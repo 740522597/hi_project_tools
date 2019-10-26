@@ -45,9 +45,7 @@ class RunMerchAPIMonitor extends Command
         $tempMsgRepository = new TempMsgRepository();
         $url = env("RIOT_MERCH_URL");
         $data = [
-            'request_time' => Carbon::now(),
-            'status'       => 'SUCCESS',
-            'text'         => '正常'
+            'request_time' => Carbon::now()
         ];
         $curl = Curl::to($url)
             ->withTimeout(60)
@@ -55,8 +53,10 @@ class RunMerchAPIMonitor extends Command
         $response = $curl->post();
 
         if (!$response) {
-            $data['status'] = 'FAILED';
-            $data['text'] = '无响应';
+            $data['status'] = '0';
+        }
+        if ($response) {
+            $data['status'] = $response->status;
         }
         $tempMsgRepository->sendMerchAPIMonitor($data);
         return;

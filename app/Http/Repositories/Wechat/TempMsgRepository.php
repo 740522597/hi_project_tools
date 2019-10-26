@@ -14,10 +14,8 @@ class TempMsgRepository extends WechatBaseRepository
     public function sendMerchAPIMonitor($data)
     {
         $openid = 'o3KgR1C81_5tGuO0ml2gSWrPs8SI';
-
         $color = 'green';
-
-        if ($data['status'] == 'FAILED') {
+        if ($data['status'] != 200) {
             $color = 'red';
         }
 
@@ -28,8 +26,8 @@ class TempMsgRepository extends WechatBaseRepository
                         "request_time":{
                             "value":"'.$data['request_time'].'"
                         },
-                        "text":{
-                            "value":"'.$data['text'].'",
+                        "status":{
+                            "value":"'.$data['status'].'",
                             "color":"'.$color.'"
                         }
                     }
