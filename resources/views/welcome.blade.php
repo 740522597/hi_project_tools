@@ -81,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    Assist Tool
                 </div>
 
                 <div class="links">
