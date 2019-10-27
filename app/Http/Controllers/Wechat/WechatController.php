@@ -16,6 +16,14 @@ class WechatController
 {
     public function msgReceiver(Request $request)
     {
+        $xml_str = $GLOBALS['HTTP_RAW_POST_DATA'];
+        \Log::info($xml_str);
+    }
+
+
+    //Wechat Valid
+    private function valid()
+    {
         $echoStr = $_GET["echostr"];
 
         if ($this->checkSignature()) {
