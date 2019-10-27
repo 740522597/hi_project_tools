@@ -25,6 +25,10 @@ class MsgRepository extends WechatBaseRepository
     public function receiveTypeText($postObj)
     {
         if (trim($postObj->Content) == 'OCR') {
+            WechatUserMsg::query()
+                ->where('open_id', $postObj->FromUserName)
+                ->where('content', 'OCR')
+                ->delete();
             $this->storeMsg($postObj);
             $content = '请发送清晰图片，目前可识别中英文.';
             $data = [
