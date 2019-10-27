@@ -6,7 +6,7 @@
  * @package  Laravel
  * @author   Taylor Otwell <taylor@laravel.com>
  */
-
+define("TOKEN", "assist_tool");
 define('LARAVEL_START', microtime(true));
 
 /*

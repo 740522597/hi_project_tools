@@ -8,7 +8,6 @@
 
 //你自己设置的token（自定义的）
 
-define("TOKEN", "assist_tool");
 
 $wechatObj = new wechatCallbackapiTest();
 $wechatObj->valid();
