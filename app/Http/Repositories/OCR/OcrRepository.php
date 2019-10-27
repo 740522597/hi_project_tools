@@ -26,6 +26,7 @@ class OcrRepository {
             ->lang('chi_sim', 'eng')
             ->psm(12)
             ->oem(3)
+            ->userPatterns(public_path('user-patterns.txt'))
             ->run();
     }
 }
