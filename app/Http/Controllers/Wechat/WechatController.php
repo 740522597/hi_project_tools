@@ -12,12 +12,14 @@ namespace App\Http\Controllers\Wechat;
 use App\Http\Repositories\Wechat\WechatBaseRepository;
 use App\WechatUserMsg;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class WechatController
 {
     public function msgReceiver(Request $request)
     {
         $postArr = file_get_contents("php://input");    //php7.0只能用这种方式获取数据，之前的$GLOBALS['HTTP_RAW_POST_DATA']7.0版本不可用
+        Log::info($postArr);
         $postObj = simplexml_load_string($postArr);    //读取xml格式文件,记得安装php7.0-xml
 
         //接收关注事件推送：用户关注微信号后，将会受到一条“欢迎光临”的消息
