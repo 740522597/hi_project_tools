@@ -10,6 +10,7 @@ namespace App\Http\Controllers\Wechat;
 
 
 use App\Http\Repositories\Wechat\WechatBaseRepository;
+use App\WechatUserMsg;
 use Illuminate\Http\Request;
 
 class WechatController
@@ -39,56 +40,30 @@ class WechatController
             }
         }
 
-        if(strtolower($postObj->MsgType)=='text' && trim($postObj->Content)=='tuwen')
+        if(strtolower($postObj->MsgType)=='text' && trim($postObj->Content)=='OCR')
         {
             $toUser   =$postObj->FromUserName;
             $fromUser =$postObj->ToUserName;
-            $arr=array
-            (
-                array(
-                    'title'=>'百度',
-                    'description'=>"百度很棒!",   //单图文会显示，多图文不显示description
-                    'picUrl'=>'http://www.peng.com/baidu.jpg',
-                    'url'=>'http://www.baidu.com',    //这里的网页也可以是自己写的html,php等网页
-                ),
-                array(
-                    'title'=>'中国亚马逊',
-                    'description'=>"中国亚马逊很棒！",
-                    'picUrl'=>'http://www.peng.com/amazon_cn.png',
-                    'url'=>'https://www.amazon.cn/',
-                ),
-                array(
-                    'title'=>'Amazon in UK',
-                    'description'=>"Amanon is very good!",
-                    'picUrl'=>'http://www.peng.com/amazon_co_uk.png',
-                    'url'=>'https://www.amazon.co.uk/',
-                ),
-                array(
-                    'title'=>'Amazon en France',
-                    'description'=>"Amazon est très bon!",
-                    'picUrl'=>'http://www.peng.com/amazon_fr.png',
-                    'url'=>'https://www.amazon.fr/',
-                )
-            );
-            $template="<xml>
-                        <ToUserName><![CDATA[%s]]></ToUserName>
-                        <FromUserName><![CDATA[%s]]></FromUserName>
-                        <CreateTime>%s</CreateTime>
-                        <MsgType><![CDATA[%s]]></MsgType>
-                        <ArticleCount>".count($arr)."</ArticleCount>
-                        <Articles>";
-            foreach($arr as $k=>$v)
-            {
-                $template .="<item>
-                            <Title><![CDATA[".$v['title']."]]></Title>
-                            <Description><![CDATA[".$v['description']."]]></Description>
-                            <PicUrl><![CDATA[".$v['picUrl']."]]></PicUrl>
-                            <Url><![CDATA[".$v['url']."]]></Url>
-                            </item>";
-            }
-            $template .="</Articles>
-                        </xml> ";
-            echo sprintf($template,$toUser,$fromUser,time(),'news');
+
+            WechatUserMsg::query()
+                ->firstOrCreate([
+                   'open_id' => $postObj->FromUserName,
+                   'from_user' => $postObj->FromUserName,
+                   'to_user' => $postObj->ToUserName,
+                   'create_time' => $postObj->CreateTime,
+                   'content' => $postObj->Content,
+                   'msg_type' => strtolower($postObj->MsgType)
+                ]);
+
+            $template  = "<xml>
+                               <ToUserName><![CDATA[%s]]></ToUserName>
+                               <FromUserName><![CDATA[%s]]></FromUserName>
+                               <CreateTime>%s</CreateTime>
+                               <MsgType><![CDATA[%s]]></MsgType>
+                               <Content><![CDATA[%s]]></Content>
+                                </xml>";
+            $content = '请发送清晰图片，目前可识别中英文.';
+            echo sprintf($template,$toUser,$fromUser,time(),'text', $content);
         }
     }
 
