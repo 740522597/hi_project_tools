@@ -35,6 +35,7 @@ class PushWechatTempMsg implements ShouldQueue
     {
         $accessToken = $this->tempMsgRepository->getAccessToken();
         $url = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token='.$accessToken;
-        $this->tempMsgRepository->https_request($url, $this->tempMsg);
+        $result = $this->tempMsgRepository->https_request($url, $this->tempMsg);
+        dd($result);
     }
 }

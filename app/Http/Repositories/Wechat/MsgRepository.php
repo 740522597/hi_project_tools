@@ -41,7 +41,7 @@ class MsgRepository extends WechatBaseRepository
 
     public function receiveTypeEvent($postObj)
     {
-        if(strtolower($postObj->Event) == 'subscribe'){
+        if (strtolower($postObj->Event) == 'subscribe') {
             $data = [
                 'template'  => $this->textTemp(),
                 'to_user'   => $postObj->FromUserName,
@@ -66,10 +66,10 @@ class MsgRepository extends WechatBaseRepository
             ->orderBy('id', 'desc')
             ->first();
 
-        if ($lastMsg && $lastMsg->content == 'OCR') {
+//        if ($lastMsg && $lastMsg->content == 'OCR') {
             $this->storeMsg($postObj);
             OCRforWechat::dispatch($this->msg);
-        }
+//        }
         return null;
     }
 
@@ -84,7 +84,7 @@ class MsgRepository extends WechatBaseRepository
                 'content'     => $postObj->Content,
                 'msg_type'    => strtolower($postObj->MsgType),
                 'msg_id'      => strtolower($postObj->MsgId),
-                'media_id'    => isset($postObj->MediaId) ? strtolower($postObj->MediaId) : null,
+                'media_id'    => isset($postObj->MediaId) ? $postObj->MediaId : null,
                 'pic_url'     => isset($postObj->PicUrl) ? $postObj->PicUrl : null
             ]);
     }

@@ -75,7 +75,8 @@ class WechatBaseRepository {
         return $package;
     }
 
-    public function saveMedia($url, $path){
+    public function saveMedia($mediaId, $path){
+        $url = 'http://file.api.weixin.qq.com/cgi-bin/media/get?access_token=' . $this->getAccessToken() . '&media_id=' . $mediaId;
         $content = $this->downloadMedia($url);
         $local_file=fopen($path,'w');
         if(false!==$local_file){

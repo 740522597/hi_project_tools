@@ -4,30 +4,31 @@ namespace App\Jobs;
 
 use App\Http\Repositories\OCR\OcrRepository;
 use App\Http\Repositories\Wechat\TempMsgRepository;
+use App\Http\Repositories\Wechat\WechatBaseRepository;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Log;
 
 class OCRforWechat implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private $mediaMsg = null;
-    private $tempMsgRepo = null;
-    private $ocrRepo = null;
+    private $msg        = null;
+    private $wechatRepo = null;
 
     /**
      * Create a new job instance.
      *
-     * @param $mediaMsg
+     * @param $postObj
+     * @param $msg
      */
-    public function __construct($mediaMsg)
+    public function __construct($msg)
     {
-        $this->mediaMsg = $mediaMsg;
-        $this->tempMsgRepo = new TempMsgRepository();
-        $this->ocrRepo = new OcrRepository();
+        $this->msg = $msg;
+        $this->wechatRepo = new WechatBaseRepository();
     }
 
     /**
@@ -37,22 +38,28 @@ class OCRforWechat implements ShouldQueue
      */
     public function handle()
     {
-        $url = 'http://file.api.weixin.qq.com/cgi-bin/media/get?access_token=' . $this->tempMsgRepo->getAccessToken() . '&media_id=' . $this->mediaMsg->media_id;
-        $filePath = public_path('/images/' . $this->mediaMsg->media_id . '.jpeg');
-        $this->tempMsgRepo->saveMedia($url, $filePath);
+        $filePath = public_path('/images/' . $this->msg->media_id . '.jpeg');
+
         if (file_exists($filePath)) {
-            $text =  $this->ocrRepo->ocr($filePath);
+            unlink($filePath);
+        }
+        $this->wechatRepo->saveMedia($this->msg->media_id, $filePath);
+        if (file_exists($filePath)) {
+            $ocrRepo = new OcrRepository();
+            $text = $ocrRepo->ocr($filePath);
+            $text = str_replace("\n", ' ', $text);
             $tempMsg = '{
-                   "touser":"'.$this->mediaMsg->from_user.'",
-                   "template_id":"'.env("API_MONITOR_TEMP_ID").'",
+                   "touser":"' . $this->msg->from_user . '",
+                   "template_id":"' . env("OCR_TEMP_ID") . '",
                     "data":{
                         "text":{
-                            "value":"'.$text.'"
+                            "value":"' . $text . '"
                         }
                     }
                }';
             PushWechatTempMsg::dispatch($tempMsg);
             unlink($filePath);
         }
+        return;
     }
 }
