@@ -24,7 +24,8 @@ class OcrRepository {
         return $this->ocr
             ->threadLimit(1)
             ->lang('chi_sim', 'eng')
-            ->psm(6)
+            ->psm(12)
+            ->oem(3)
             ->run();
     }
 }
