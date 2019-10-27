@@ -19,9 +19,12 @@ class CreateWechatUserMsgsTable extends Migration
             $table->string('from_user');
             $table->string('to_user');
             $table->dateTime('create_time');
-            $table->text('content');
+            $table->text('content')->nullable();
             $table->string('msg_type');
+            $table->string('msg_id')->nullable();
             $table->string('event')->nullable();
+            $table->string('media_id')->nullable();
+            $table->text('pic_url')->nullable();
             $table->timestamps();
         });
     }

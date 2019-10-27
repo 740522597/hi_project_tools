@@ -14,6 +14,9 @@ class WechatUserMsg extends Model
       'create_time',
       'content',
       'msg_type',
+      'msg_id',
+      'media_id',
+      'pic_url',
       'event'
     ];
 }

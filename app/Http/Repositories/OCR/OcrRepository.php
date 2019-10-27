@@ -18,10 +18,9 @@ class OcrRepository {
         $this->ocr = new TesseractOCR();
     }
 
-    public function ocr()
+    public function ocr($imagePath)
     {
-        $image = public_path('images/WX20191027-144034.png');
-        $this->ocr->image($image);
+        $this->ocr->image($imagePath);
         return $this->ocr
             ->threadLimit(1)
             ->lang('chi_sim')

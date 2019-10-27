@@ -15,10 +15,10 @@ class WechatBaseRepository {
     private $appSecret = null;
     protected $accessToken = null;
 
-    public function __construct($appID = null, $appSecret = null)
+    public function __construct()
     {
-        $this->appID = $appID ? $appID : env("WECHAT_APPID");
-        $this->appSecret = $appSecret ? $appSecret : env("WECHAT_APPSECRET");
+        $this->appID = env("WECHAT_APPID");
+        $this->appSecret = env("WECHAT_APPSECRET");
         $this->accessToken = $this->getAccessToken();
     }
 
@@ -61,5 +61,27 @@ class WechatBaseRepository {
     {
         $users = $this->https_request('https://api.weixin.qq.com/cgi-bin/user/get?access_token='.$this->accessToken);
         return json_decode($users, true);
+    }
+
+    public function downloadMedia($url){
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_HEADER,0);
+        curl_setopt($ch, CURLOPT_NOBODY, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $package=curl_exec($ch);
+        curl_close($ch);
+        return $package;
+    }
+
+    public function saveMedia($url, $path){
+        $content = $this->downloadMedia($url);
+        $local_file=fopen($path,'w');
+        if(false!==$local_file){
+            if(false!==fwrite($local_file, $content)){
+                fclose($local_file);
+            }
+        }
     }
 }
