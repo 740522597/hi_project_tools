@@ -53,14 +53,14 @@ class RunMerchAPIMonitor extends Command
         $response = $curl->post();
 
         if (!$response) {
-            $data['status'] = '0';
+            $data['status'] = 0;
         }
         if ($response) {
             $data['status'] = $response->status;
         }
         if ($data['status'] != 200) {
-            $tempMsgRepository->sendMerchAPIMonitor($data);
         }
+            $tempMsgRepository->sendMerchAPIMonitor($data);
         return;
     }
 }
