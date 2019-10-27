@@ -59,6 +59,7 @@ class OCRforWechat implements ShouldQueue
                }';
             PushWechatTempMsg::dispatch($tempMsg);
             unlink($filePath);
+            $this->msg->delete();
         }
         return;
     }
