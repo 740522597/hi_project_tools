@@ -66,10 +66,11 @@ class MsgRepository extends WechatBaseRepository
             ->orderBy('id', 'desc')
             ->first();
 
-//        if ($lastMsg && $lastMsg->content == 'OCR') {
+        if ($lastMsg && $lastMsg->content == 'OCR') {
+            $lastMsg->delete();
             $this->storeMsg($postObj);
             OCRforWechat::dispatch($this->msg);
-//        }
+        }
         return null;
     }
 
