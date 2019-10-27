@@ -27,30 +27,28 @@ class WechatController
         $postObj = simplexml_load_string($xmlStr);    //读取xml格式文件,记得安装php7.0-xml
         $reply = null;
 
-        if(strtolower($postObj->MsgType) == 'event'){
+        if (strtolower($postObj->MsgType) == 'event') {
             if ($response = $msgRepo->receiveTypeEvent($postObj)) {
                 $reply = $response;
             }
         }
 
 
-        if(strtolower($postObj->MsgType)=='text')
-        {
+        if (strtolower($postObj->MsgType) == 'text') {
             if ($response = $msgRepo->receiveTypeText($postObj)) {
                 $reply = $response;
             }
         }
 
-        if(strtolower($postObj->MsgType)=='image')
-        {
-            if ($response = $msgRepo->receiveTypeImage($postObj)) {
-                $reply = $response;
-            }
+        if (strtolower($postObj->MsgType) == 'image') {
+            $msgRepo->receiveTypeImage($postObj);
         }
 
         if ($reply) {
             echo $reply;
+            exit;
         }
+        echo '';
         exit;
     }
 

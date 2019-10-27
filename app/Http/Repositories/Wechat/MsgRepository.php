@@ -10,6 +10,7 @@ namespace App\Http\Repositories\Wechat;
 
 use App\Http\Repositories\OCR\OcrRepository;
 use App\Http\Repositories\Wechat\WechatBaseRepository;
+use App\Jobs\OCRforWechat;
 use App\WechatUserMsg;
 
 class MsgRepository extends WechatBaseRepository
@@ -67,22 +68,7 @@ class MsgRepository extends WechatBaseRepository
 
         if ($lastMsg && $lastMsg->content == 'OCR') {
             $this->storeMsg($postObj);
-            $url = 'http://file.api.weixin.qq.com/cgi-bin/media/get?access_token=' . $this->getAccessToken() . '&media_id=' . $postObj->MediaId;
-            $filePath = public_path('/images/' . $postObj->MediaId . '.jpeg');
-            $this->saveMedia($url, $filePath);
-            if (file_exists($filePath)) {
-                $ocrRepo = new OcrRepository();
-                $text =  $ocrRepo->ocr($filePath);
-                unlink($filePath);
-                $data = [
-                    'template'  => $this->textTemp(),
-                    'to_user'   => $postObj->FromUserName,
-                    'from_user' => $postObj->ToUserName,
-                    'time'      => time(),
-                    'content'   => $text
-                ];
-                return $this->replyText($data);
-            }
+            OCRforWechat::dispatch($this->msg);
         }
         return null;
     }
