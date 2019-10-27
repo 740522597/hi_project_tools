@@ -8,6 +8,7 @@
 namespace App\Http\Repositories\Wechat;
 
 use App\Http\Repositories\Wechat\WechatBaseRepository;
+use App\Jobs\PushWechatTempMsg;
 
 class TempMsgRepository extends WechatBaseRepository
 {
@@ -32,7 +33,6 @@ class TempMsgRepository extends WechatBaseRepository
                         }
                     }
                }';
-        $url = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token='.$this->accessToken;
-        $this->https_request($url, $tempMsg);
+        PushWechatTempMsg::dispatch($tempMsg);
     }
 }
