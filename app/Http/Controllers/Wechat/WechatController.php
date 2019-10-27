@@ -50,7 +50,7 @@ class WechatController
                    'open_id' => $postObj->FromUserName,
                    'from_user' => $postObj->FromUserName,
                    'to_user' => $postObj->ToUserName,
-                   'create_time' => $postObj->CreateTime,
+                   'create_time' => date('Y-m-d H:i:s', strtotime($postObj->CreateTime)),
                    'content' => $postObj->Content,
                    'msg_type' => strtolower($postObj->MsgType)
                 ]);
