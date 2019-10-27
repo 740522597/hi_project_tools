@@ -59,8 +59,8 @@ class RunMerchAPIMonitor extends Command
             $data['status'] = $response->status;
         }
         if ($data['status'] != 200) {
-        }
             $tempMsgRepository->sendMerchAPIMonitor($data);
+        }
         return;
     }
 }
