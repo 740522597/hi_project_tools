@@ -44,7 +44,10 @@ class MsgRepository extends WechatBaseRepository
             return $this->replyText($data);
         }
         if (trim($postObj->Content) == 'Y') {
-            IPLoginSetTrue::dispatch($postObj->FromUserName);
+            $ipLogin = IPLoginUser::query()
+                ->where('wechat_open_id', $postObj->FromUserName)
+                ->first();
+            IPLoginSetTrue::dispatch($ipLogin->wechat_open_id);
             $content = '登录已确认，请在Web端刷新页面.';
             $data = [
                 'template'  => $this->textTemp(),
