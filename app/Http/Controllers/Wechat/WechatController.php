@@ -23,7 +23,7 @@ class WechatController
         $msgRepo = new MsgRepository();
 
         $xmlStr = file_get_contents("php://input");    //php7.0只能用这种方式获取数据，之前的$GLOBALS['HTTP_RAW_POST_DATA']7.0版本不可用
-
+Log::info($xmlStr);
         $postObj = simplexml_load_string($xmlStr);    //读取xml格式文件,记得安装php7.0-xml
         $reply = null;
 

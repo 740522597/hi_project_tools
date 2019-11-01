@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\IPLoginUser;
 use App\Jobs\IPLoginRegisterJob;
 use App\User;
+use Carbon\Carbon;
 use Closure;
 
 class IPLoginAuth
@@ -41,7 +42,8 @@ class IPLoginAuth
         if (!$ipLogin) {
             abort(403, '非法登录');
         }
-
+        $ipLogin->last_request_at = Carbon::now();
+        $ipLogin->save();
         if ($ipLogin->ip == $ip && $ipLogin->login_status == true) {
             return $next($request);
         }

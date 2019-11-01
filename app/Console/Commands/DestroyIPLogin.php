@@ -44,7 +44,7 @@ class DestroyIPLogin extends Command
             ->get();
 
         foreach ($ipLogins as $ipLogin) {
-            $destroyAt = Carbon::createFromDate($ipLogin->last_requested_at)->addMinutes(env('LOGIN_DESTROY_IN'));
+            $destroyAt = Carbon::createFromDate($ipLogin->last_request_at)->addMinutes(env('LOGIN_DESTROY_IN'));
             if (Carbon::now()->lt($destroyAt)) {
                 $ipLogin->login_status = false;
                 $ipLogin->save();

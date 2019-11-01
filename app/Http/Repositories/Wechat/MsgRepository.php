@@ -11,6 +11,7 @@ namespace App\Http\Repositories\Wechat;
 use App\Http\Repositories\OCR\OcrRepository;
 use App\Http\Repositories\Wechat\WechatBaseRepository;
 use App\IPLoginUser;
+use App\Jobs\IPLoginSetTrue;
 use App\Jobs\OCRforWechat;
 use App\WechatUserMsg;
 use Carbon\Carbon;
@@ -43,17 +44,7 @@ class MsgRepository extends WechatBaseRepository
             return $this->replyText($data);
         }
         if (trim($postObj->Content) == 'Y') {
-            WechatUserMsg::query()
-                ->where('to_user', $postObj->FromUserName)
-                ->where('msg_type', WechatUserMsg::IP_LOGIN_TYPE)
-                ->orderBy('id', 'desc')
-                ->first();
-            $ipLogin = IPLoginUser::query()
-                ->where('wechat_open_id', $postObj->FromUserName)
-                ->first();
-            $ipLogin->login_status = true;
-            $ipLogin->last_requested_at = Carbon::now();
-            $ipLogin->save();
+            IPLoginSetTrue::dispatch($postObj->FromUserName);
             $content = '登录已确认，请在Web端刷新页面.';
             $data = [
                 'template'  => $this->textTemp(),
