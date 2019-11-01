@@ -28,7 +28,7 @@ class WechatBaseRepository {
             ->firstOrCreate([
                 'type' => AccessToken::TYPE_WECHAT
             ]);
-        $expired_at = Carbon::parse('+2 hours');
+        $expired_at = Carbon::parse('+1 hours');
         if (!$token->token || ($token->token && Carbon::parse($token->expired_at)->lt(Carbon::now()))) {
             $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=$this->appID&secret=$this->appSecret";
             $resp = $this->https_request($url);
