@@ -19,4 +19,6 @@ class WechatUserMsg extends Model
       'pic_url',
       'event'
     ];
+
+    const IP_LOGIN_TYPE = 'IP_LOGIN_TYPE';
 }

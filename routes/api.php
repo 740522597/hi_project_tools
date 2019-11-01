@@ -20,3 +20,7 @@ Route::prefix('wechat')->group(function () {
     Route::get('msg-receiver', 'Wechat\WechatController@msgReceiver');
     Route::post('msg-receiver', 'Wechat\WechatController@msgReceiver');
 });
+Route::middleware('ip_login')->prefix('hi-project')->group(function () {
+    Route::get('ip-login', 'API\APIController@ipLogin');
+    Route::post('ip-login', 'API\APIController@ipLogin');
+});

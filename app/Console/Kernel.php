@@ -28,6 +28,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         $schedule->command('merch:api-monitor')->everyMinute();
+        $schedule->command('ip-login:destroy')->everyMinute();
     }
 
     /**

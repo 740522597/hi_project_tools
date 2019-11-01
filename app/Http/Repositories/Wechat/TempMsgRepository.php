@@ -9,6 +9,7 @@ namespace App\Http\Repositories\Wechat;
 
 use App\Http\Repositories\Wechat\WechatBaseRepository;
 use App\Jobs\PushWechatTempMsg;
+use Carbon\Carbon;
 
 class TempMsgRepository extends WechatBaseRepository
 {
@@ -29,6 +30,30 @@ class TempMsgRepository extends WechatBaseRepository
                         },
                         "status":{
                             "value":"'.$data['status'].'",
+                            "color":"'.$color.'"
+                        }
+                    }
+               }';
+        PushWechatTempMsg::dispatch($tempMsg);
+    }
+
+    public function sendIPLoginMsg($ipLogin, $ip)
+    {
+        $color = 'green';
+        $tempMsg = '{
+                   "touser":"'.$ipLogin->wechat_open_id.'",
+                   "template_id":"'.env("IPLOGIN_TEMP_ID").'",
+                    "data":{
+                        "name":{
+                            "value":"'.$ipLogin->user->name.'",
+                            "color":"'.$color.'"
+                        },
+                        "time":{
+                            "value":"'.Carbon::now().'",
+                            "color":"'.$color.'"
+                        },
+                        "ip":{
+                            "value":"'.$ip.'",
                             "color":"'.$color.'"
                         }
                     }
