@@ -18,8 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::prefix('wechat')->group(function () {
-    Route::get('msg-receiver', 'Wechat\WechatController@msgReceiver');
-    Route::post('msg-receiver', 'Wechat\WechatController@msgReceiver');
+    Route::get('msg-receiver', 'Wechat\WechatController@valid');
+    Route::post('msg-receiver', 'Wechat\WechatController@valid');
 });
 Route::middleware('ip_login')->prefix('hi-project')->group(function () {
     Route::get('ip-login', 'API\APIController@ipLogin');
