@@ -30,6 +30,8 @@ class IPLoginAuth
             ->first();
 
         if ($ipLogin) {
+            $ipLogin->last_request_at = Carbon::now();
+            $ipLogin->save();
             Auth::loginUsingId($ipLogin->user->id);
             return $next($request);
         }
