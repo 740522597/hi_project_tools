@@ -53,7 +53,7 @@ Log::info($xmlStr);
     }
 
     //Wechat Valid
-    public function valid()
+    private function valid()
     {
         $echoStr = $_GET["echostr"];
 
