@@ -9,6 +9,7 @@ class HPPlan extends Model
     protected $table    = 'hp_plans';
     public    $fillable = [
         'project_id',
-        'title'
+        'title',
+        'urgency_level'
     ];
 }

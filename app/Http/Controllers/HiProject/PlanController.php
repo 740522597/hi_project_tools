@@ -61,7 +61,7 @@ class PlanController extends Controller
             }
 
             $plans = HPPlan::query()
-                ->orderBy('id', 'desc')
+                ->orderBy('urgency_level', 'asc')
                 ->get();
 
             return response()->json(['success' => true, 'plans' => $plans]);
@@ -70,26 +70,21 @@ class PlanController extends Controller
         }
     }
 
-    public function taskList(Request $request)
+    public function updatePlanLevel(Request $request)
     {
         try {
-            $planId = $request->get('plan_id', null);
-            if (!$planId) {
-                throw new \Exception('缺少计划ID.');
-            }
-            $plan = HPPlan::query()
-                ->where('id', $planId)
-                ->first();
-            if (!$plan) {
-                throw new \Exception('未能找到该计划');
+            $levels = $request->all();
+            foreach ($levels as $planId => $level) {
+                $plan = HPPlan::query()
+                    ->find($planId);
+                if (!$plan) {
+                    throw new \Exception('未找到对应计划.');
+                }
+                $plan->urgency_level = $level + 1;
+                $plan->save();
             }
 
-            $tasks = HPTask::query()
-                ->where('plan_id', $plan->id)
-                ->orderBy('id', 'desc')
-                ->get();
-
-            return response()->json(['success' => true, 'tasks' => $tasks]);
+            return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }

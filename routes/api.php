@@ -25,6 +25,11 @@ Route::middleware('ip_login')->prefix('hi-project')->group(function () {
     Route::get('ip-login', 'API\APIController@ipLogin');
     Route::post('ip-login', 'API\APIController@ipLogin');
     Route::post('add-plan', 'HiProject\PlanController@addPlan');
+    Route::post('update-plan-level', 'HiProject\PlanController@updatePlanLevel');
+    Route::post('update-task-level', 'HiProject\TaskController@updateTaskLevel');
     Route::post('plan-list', 'HiProject\PlanController@planList');
-    Route::post('task-list', 'HiProject\PlanController@taskList');
+    Route::post('task-list', 'HiProject\TaskController@taskList');
+    Route::post('add-task', 'HiProject\TaskController@addTask');
+    Route::post('update-task', 'HiProject\TaskController@updateTask');
+    Route::post('task-details', 'HiProject\TaskController@taskDetails');
 });
