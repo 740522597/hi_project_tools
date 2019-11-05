@@ -7,6 +7,7 @@ use App\Jobs\IPLoginRegisterJob;
 use App\User;
 use Carbon\Carbon;
 use Closure;
+use Illuminate\Support\Facades\Auth;
 
 class IPLoginAuth
 {
@@ -21,6 +22,17 @@ class IPLoginAuth
     {
         $ip = $request->getClientIp();
         $username = $request->get('username', null);
+
+        $ipLogin = IPLoginUser::query()
+            ->with('user')
+            ->where('ip', $ip)
+            ->where('login_status', 1)
+            ->first();
+
+        if ($ipLogin) {
+            Auth::loginUsingId($ipLogin->user->id);
+            return $next($request);
+        }
 
         if (env('APP_ENV') == 'local') {
             return $next($request);
@@ -49,6 +61,7 @@ class IPLoginAuth
         $ipLogin->last_request_at = Carbon::now();
         $ipLogin->save();
         if ($ipLogin->ip == $ip && $ipLogin->login_status == true) {
+            Auth::loginUsingId($user->id);
             return $next($request);
         }
         IPLoginRegisterJob::dispatch($ipLogin, $ip);
