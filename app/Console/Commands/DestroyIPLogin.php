@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\IPLoginUser;
+use App\Models\IPLoginUser;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 

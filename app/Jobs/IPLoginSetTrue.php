@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\IPLoginUser;
-use App\WechatUserMsg;
+use App\Models\IPLoginUser;
+use App\Models\WechatUserMsg;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;

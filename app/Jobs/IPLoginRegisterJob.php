@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Http\Repositories\Wechat\MsgRepository;
 use App\Http\Repositories\Wechat\TempMsgRepository;
-use App\WechatUserMsg;
+use App\Models\WechatUserMsg;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
