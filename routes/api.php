@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::post('add-plan', 'HiProject\PlanController@addPlan');
+
 Route::prefix('wechat')->group(function () {
     Route::get('msg-receiver', 'Wechat\WechatController@msgReceiver');
     Route::post('msg-receiver', 'Wechat\WechatController@msgReceiver');
@@ -24,4 +24,7 @@ Route::prefix('wechat')->group(function () {
 Route::middleware('ip_login')->prefix('hi-project')->group(function () {
     Route::get('ip-login', 'API\APIController@ipLogin');
     Route::post('ip-login', 'API\APIController@ipLogin');
+    Route::post('add-plan', 'HiProject\PlanController@addPlan');
+    Route::post('plan-list', 'HiProject\PlanController@planList');
+    Route::post('task-list', 'HiProject\PlanController@taskList');
 });

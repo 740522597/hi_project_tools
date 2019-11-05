@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\IPLoginUser;
+use App\Models\IPLoginUser;
 use App\Jobs\IPLoginRegisterJob;
 use App\User;
 use Carbon\Carbon;
@@ -21,6 +21,10 @@ class IPLoginAuth
     {
         $ip = $request->getClientIp();
         $username = $request->get('username', null);
+
+        if (env('APP_ENV') == 'local') {
+            return $next($request);
+        }
 
         if (!$username) {
             abort(403, '您没有权限操作');

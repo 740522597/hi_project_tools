@@ -7,7 +7,7 @@
  */
 namespace App\Http\Repositories\Wechat;
 
-use App\AccessToken;
+use App\Models\AccessToken;
 use Carbon\Carbon;
 
 class WechatBaseRepository {

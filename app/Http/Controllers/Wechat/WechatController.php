@@ -12,7 +12,7 @@ namespace App\Http\Controllers\Wechat;
 use App\Http\Repositories\OCR\OcrRepository;
 use App\Http\Repositories\Wechat\MsgRepository;
 use App\Http\Repositories\Wechat\WechatBaseRepository;
-use App\WechatUserMsg;
+use App\Models\WechatUserMsg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 

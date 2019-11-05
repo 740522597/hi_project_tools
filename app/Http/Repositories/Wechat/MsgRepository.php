@@ -10,10 +10,10 @@ namespace App\Http\Repositories\Wechat;
 
 use App\Http\Repositories\OCR\OcrRepository;
 use App\Http\Repositories\Wechat\WechatBaseRepository;
-use App\IPLoginUser;
+use App\Models\IPLoginUser;
 use App\Jobs\IPLoginSetTrue;
 use App\Jobs\OCRforWechat;
-use App\WechatUserMsg;
+use App\Models\WechatUserMsg;
 use Carbon\Carbon;
 
 class MsgRepository extends WechatBaseRepository
