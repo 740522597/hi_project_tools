@@ -34,11 +34,11 @@ class TaskController extends Controller
             }
             $task = HPTask::query()
                 ->firstOrCreate([
-                   'title' => $title,
-                   'description' => $description,
-                   'plan_id' => $planId,
-                   'code' => 0,
-                   'prefix' => 'TASK'
+                    'title'       => $title,
+                    'description' => $description,
+                    'plan_id'     => $planId,
+                    'code'        => 0,
+                    'prefix'      => 'TASK'
                 ]);
             $task->code = $task->id;
 
@@ -110,6 +110,7 @@ class TaskController extends Controller
             $taskId = $request->get('task_id', null);
             $title = $request->get('title', null);
             $description = $request->get('description', null);
+            $status = $request->get('status', null);
             if (!$taskId || !$title || !$description) {
                 throw new \Exception('缺少必填项.');
             }
@@ -120,6 +121,9 @@ class TaskController extends Controller
             }
             $task->title = $title;
             $task->description = $description;
+            if ($status) {
+                $task->status = $status;
+            }
             $task->save();
 
             return response()->json(['success' => true, 'task' => $task]);
@@ -141,6 +145,48 @@ class TaskController extends Controller
                 $task->urgency_level = $level + 1;
                 $task->save();
             }
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function deleteTask(Request $request)
+    {
+        try {
+            $taskId = $request->get('task_id', null);
+            if (!$taskId) {
+                throw new \Exception('缺少任务ID.');
+            }
+            $task = HPTask::query()
+                ->find($taskId);
+            if (!$task) {
+                throw new \Exception('该任务已被删除.');
+            }
+            $task->delete();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function taskStatus(Request $request)
+    {
+        try {
+            $taskId = $request->get('id', null);
+            $status = $request->get('status', null);
+            if (!$taskId || !$status) {
+                throw new \Exception('缺少任务ID或状态.');
+            }
+            $task = HPTask::query()
+                ->find($taskId);
+            if (!$task) {
+                throw new \Exception('该任务已被删除.');
+            }
+            $task->status = $status;
+            $task->save();
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {

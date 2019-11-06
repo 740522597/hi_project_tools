@@ -19,7 +19,8 @@ class PlanController extends Controller
     public function addPlan(Request $request)
     {
         try {
-            $name = $request->get('plan_name', null);
+            $name = $request->get('title', null);
+            $id = $request->get('id', null);
             $projectId = $request->get('project_id', null);
             if (!$name || !$projectId) {
                 throw new \Exception('缺少计划名称或者项目.');
@@ -30,11 +31,18 @@ class PlanController extends Controller
             if (!$project) {
                 throw new \Exception('未能找到该项目');
             }
-            HPPlan::query()
-                ->firstOrCreate([
-                   'project_id' => $project->id,
-                   'title' => $name
-                ]);
+            if (!$id) {
+                HPPlan::query()
+                    ->firstOrCreate([
+                        'project_id' => $project->id,
+                        'title' => $name
+                    ]);
+            } else {
+                HPPlan::query()->where('id', $id)
+                    ->update([
+                        'title' => $name
+                    ]);
+            }
 
             $plans = HPPlan::query()
                 ->orderBy('id', 'desc')
@@ -83,6 +91,33 @@ class PlanController extends Controller
                 $plan->urgency_level = $level + 1;
                 $plan->save();
             }
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function deletePlan(Request $request)
+    {
+        try {
+            $planId = $request->get('plan_id', null);
+            if (!$planId) {
+                throw new \Exception('缺少计划ID.');
+            }
+            $plan = HPPlan::query()
+                ->find($planId);
+            if (!$plan) {
+                throw new \Exception('该计划已被删除.');
+            }
+            $tasksCount = HPTask::query()
+                ->where('plan_id', $planId)
+                ->count();
+
+            if ($tasksCount > 0) {
+                throw new \Exception('请先删除计划内任务.');
+            }
+            $plan->delete();
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
