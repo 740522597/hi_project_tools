@@ -23,11 +23,11 @@ class HPTask extends Model
         'urgency_level',
         'due_at'
     ];
-    public $appends = ['is_pass_due'];
+    public $appends  = ['is_pass_due'];
 
     public function getIsPassDueAttribute()
     {
-        if ($this->attributes['due_at'] && Carbon::parse($this->attributes['due_at'])->lt(Carbon::now())) {
+        if ($this->attributes['due_at'] && $this->attributes['status'] != 'DONE' && Carbon::parse($this->attributes['due_at'])->lt(Carbon::now())) {
             return true;
         }
         return false;
