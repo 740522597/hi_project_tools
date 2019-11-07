@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class HPTask extends Model
@@ -19,6 +20,16 @@ class HPTask extends Model
         'end_at',
         'estimation',
         'status',
-        'urgency_level'
+        'urgency_level',
+        'due_at'
     ];
+    public $appends = ['is_pass_due'];
+
+    public function getIsPassDueAttribute()
+    {
+        if ($this->attributes['due_at'] && Carbon::parse($this->attributes['due_at'])->lt(Carbon::now())) {
+            return true;
+        }
+        return false;
+    }
 }

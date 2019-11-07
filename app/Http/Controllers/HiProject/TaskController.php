@@ -22,6 +22,7 @@ class TaskController extends Controller
             $title = $request->get('title', null);
             $planId = $request->get('plan_id', null);
             $description = $request->get('description', null);
+            $dueAt = $request->get('due_at', null);
 
             if (!$title || !$planId || !$description) {
                 throw new \Exception('请检查必填内容.');
@@ -41,6 +42,7 @@ class TaskController extends Controller
                     'prefix'      => 'TASK'
                 ]);
             $task->code = $task->id;
+            $task->due_at = $dueAt;
 
             $project = HPProject::query()
                 ->where('id', $plan->project_id)
@@ -111,6 +113,7 @@ class TaskController extends Controller
             $title = $request->get('title', null);
             $description = $request->get('description', null);
             $status = $request->get('status', null);
+            $dueAt = $request->get('due_at', null);
             if (!$taskId || !$title || !$description) {
                 throw new \Exception('缺少必填项.');
             }
@@ -120,6 +123,7 @@ class TaskController extends Controller
                 throw new \Exception('未能找到对应的任务');
             }
             $task->title = $title;
+            $task->due_at = $dueAt;
             $task->description = $description;
             if ($status) {
                 $task->status = $status;
