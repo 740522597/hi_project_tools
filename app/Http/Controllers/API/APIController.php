@@ -18,6 +18,6 @@ class APIController
 {
     public function ipLogin(Request $request)
     {
-        dd($request);
+        return response()->json(['success' => true, 'status' => 200]);
     }
 }

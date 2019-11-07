@@ -36,12 +36,11 @@ class IPLoginAuth
             return $next($request);
         }
 
-        if (env('APP_ENV') == 'local') {
-            return $next($request);
-        }
-
+//        if (env('APP_ENV') == 'local') {
+//            return $next($request);
+//        }
         if (!$username) {
-            abort(403, '您没有权限操作');
+            return response()->json(['success' => false, 'message' => '你没有权限操作.', 'status' => 403]);
         }
 
         $user = User::query()
@@ -49,7 +48,7 @@ class IPLoginAuth
             ->first();
 
         if (!$user) {
-            abort(403, '用户不存在');
+            return response()->json(['success' => false, 'message' => '用户不存在.', 'status' => 403]);
         }
 
         $ipLogin = IPLoginUser::query()
@@ -58,7 +57,7 @@ class IPLoginAuth
             ->first();
 
         if (!$ipLogin) {
-            abort(403, '非法登录');
+            return response()->json(['success' => false, 'message' => '非法登录.', 'status' => 403]);
         }
         $ipLogin->last_request_at = Carbon::now();
         $ipLogin->save();
@@ -68,6 +67,6 @@ class IPLoginAuth
         }
         IPLoginRegisterJob::dispatch($ipLogin, $ip);
 
-        abort(403, '请在微信中确认登陆');
+        return response()->json(['success' => true, 'message' => '请在微信端确认登录', 'status' => 403]);
     }
 }

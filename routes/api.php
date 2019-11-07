@@ -22,7 +22,7 @@ Route::prefix('wechat')->group(function () {
     Route::post('msg-receiver', 'Wechat\WechatController@msgReceiver');
 });
 Route::middleware('ip_login')->prefix('hi-project')->group(function () {
-    Route::get('ip-login', 'API\APIController@ipLogin');
+//    Route::get('ip-login', 'API\APIController@ipLogin');
     Route::post('ip-login', 'API\APIController@ipLogin');
     Route::post('add-plan', 'HiProject\PlanController@addPlan');
     Route::post('delete-plan', 'HiProject\PlanController@deletePlan');
