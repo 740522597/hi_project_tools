@@ -126,4 +126,23 @@ class PlanController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    public function getPlan(Request $request)
+    {
+        try {
+            $planId = $request->get('plan_id', null);
+            if (!$planId) {
+                throw new \Exception('缺少计划ID.');
+            }
+            $plan = HPPlan::query()
+                ->find($planId);
+            if (!$plan) {
+                throw new \Exception('该计划已被删除.');
+            }
+
+            return response()->json(['success' => true, 'plan' => $plan]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
 }

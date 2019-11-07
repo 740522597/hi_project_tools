@@ -12,4 +12,14 @@ class HPPlan extends Model
         'title',
         'urgency_level'
     ];
+
+    public $appends = ['unfinished_count'];
+
+    public function getUnfinishedCountAttribute()
+    {
+        return HPTask::query()
+            ->where('plan_id', $this->attributes['id'])
+            ->where('status', '<>', 'DONE')
+            ->count();
+    }
 }
