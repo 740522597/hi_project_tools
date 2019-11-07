@@ -65,8 +65,11 @@ class IPLoginAuth
             Auth::loginUsingId($user->id);
             return $next($request);
         }
-        IPLoginRegisterJob::dispatch($ipLogin, $ip);
 
+        if (Carbon::parse($this->ipLogin->last_request_at->addMinutes(5))->lt(Carbon::now())) {
+            IPLoginRegisterJob::dispatch($ipLogin, $ip);
+        }
         return response()->json(['success' => true, 'message' => '请在微信端确认登录', 'status' => 403]);
+
     }
 }

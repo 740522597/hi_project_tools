@@ -17,7 +17,8 @@ class IPLoginRegisterJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $ipLogin = null;
-    private $ip = null;
+    private $ip      = null;
+
     /**
      * Create a new job instance.
      *
@@ -37,24 +38,22 @@ class IPLoginRegisterJob implements ShouldQueue
      */
     public function handle()
     {
-        if (Carbon::parse($this->ipLogin->last_request_at->addMinutes(5))->lt(Carbon::now())) {
-            $msgRepo = new TempMsgRepository();
-            $msgRepo->sendIPLoginMsg($this->ipLogin, $this->ip);
-            $this->ipLogin->ip = $this->ip;
-            $this->ipLogin->login_status = false;
-            $this->ipLogin->save();
-            WechatUserMsg::query()
-                ->firstOrCreate([
-                    'open_id'     => env('ADMIN_MSG_SEND_FROM'),
-                    'from_user'   => env('ADMIN_MSG_SEND_FROM'),
-                    'to_user'     => $this->ipLogin->wechat_open_id,
-                    'create_time' => Carbon::now(),
-                    'content'     => WechatUserMsg::IP_LOGIN_TYPE,
-                    'msg_type'    => WechatUserMsg::IP_LOGIN_TYPE,
-                    'msg_id'      => null,
-                    'media_id'    => null,
-                    'pic_url'     => null
-                ]);
-        }
-        }
+        $msgRepo = new TempMsgRepository();
+        $msgRepo->sendIPLoginMsg($this->ipLogin, $this->ip);
+        $this->ipLogin->ip = $this->ip;
+        $this->ipLogin->login_status = false;
+        $this->ipLogin->save();
+        WechatUserMsg::query()
+            ->firstOrCreate([
+                'open_id'     => env('ADMIN_MSG_SEND_FROM'),
+                'from_user'   => env('ADMIN_MSG_SEND_FROM'),
+                'to_user'     => $this->ipLogin->wechat_open_id,
+                'create_time' => Carbon::now(),
+                'content'     => WechatUserMsg::IP_LOGIN_TYPE,
+                'msg_type'    => WechatUserMsg::IP_LOGIN_TYPE,
+                'msg_id'      => null,
+                'media_id'    => null,
+                'pic_url'     => null
+            ]);
+    }
 }
