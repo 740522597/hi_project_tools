@@ -40,7 +40,8 @@ class TaskController extends Controller
                     'description' => $description,
                     'plan_id'     => $planId,
                     'code'        => 0,
-                    'prefix'      => 'TASK'
+                    'prefix'      => 'TASK',
+                    'urgency_level' => -1
                 ]);
             $task->code = $task->id;
             $task->due_at = $dueAt;
@@ -56,7 +57,17 @@ class TaskController extends Controller
 
             $tasks = HPTask::query()
                 ->where('plan_id', $planId)
-                ->orderBy('id', 'desc')
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            foreach ($tasks as $key => $task) {
+                $task->urgency_level = $key;
+                $task->save();
+            }
+
+            $tasks = HPTask::query()
+                ->where('plan_id', $planId)
+                ->orderBy('urgency_level', 'asc')
                 ->get();
             return response()->json(['success' => true, 'tasks' => $tasks]);
         } catch (\Exception $e) {
@@ -141,13 +152,25 @@ class TaskController extends Controller
     {
         try {
             $levels = $request->all();
+            $taskIds = [];
             foreach ($levels as $taskId => $level) {
                 $task = HPTask::query()
                     ->find($taskId);
                 if (!$task) {
                     throw new \Exception('未找到对应任务.');
                 }
+                $taskIds[] = $taskId;
                 $task->urgency_level = $level + 1;
+                $task->save();
+            }
+
+            $tasks = HPTask::query()
+                ->whereIn('id', $taskIds)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            foreach ($tasks as $key => $task) {
+                $task->urgency_level = $key;
                 $task->save();
             }
 
@@ -169,7 +192,19 @@ class TaskController extends Controller
             if (!$task) {
                 throw new \Exception('该任务已被删除.');
             }
+
+            $planId = $task->planId;
             $task->delete();
+
+            $tasks = HPTask::query()
+                ->where('plan_id', $planId)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            foreach ($tasks as $key => $task) {
+                $task->urgency_level = $key;
+                $task->save();
+            }
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {

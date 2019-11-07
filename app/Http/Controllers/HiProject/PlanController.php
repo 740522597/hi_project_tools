@@ -35,7 +35,8 @@ class PlanController extends Controller
                 HPPlan::query()
                     ->firstOrCreate([
                         'project_id' => $project->id,
-                        'title' => $name
+                        'title' => $name,
+                        'urgency_level' => -1
                     ]);
             } else {
                 HPPlan::query()->where('id', $id)
@@ -45,8 +46,18 @@ class PlanController extends Controller
             }
 
             $plans = HPPlan::query()
+                ->where('project_id', $projectId)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            foreach ($plans as $key => $plan) {
+                $plan->urgency_level = $key;
+                $plan->save();
+            }
+
+            $plans = HPPlan::query()
                 ->where('project_id', $project->id)
-                ->orderBy('id', 'desc')
+                ->orderBy('urgency_level', 'asc')
                 ->get();
 
             return response()->json(['success' => true, 'plans' => $plans]);
@@ -84,13 +95,25 @@ class PlanController extends Controller
     {
         try {
             $levels = $request->all();
+            $planIds = [];
             foreach ($levels as $planId => $level) {
                 $plan = HPPlan::query()
                     ->find($planId);
                 if (!$plan) {
                     throw new \Exception('未找到对应计划.');
                 }
+                $planIds[] = $planId;
                 $plan->urgency_level = $level + 1;
+                $plan->save();
+            }
+
+            $plans = HPPlan::query()
+                ->whereIn('id', $planIds)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            foreach ($plans as $key => $plan) {
+                $plan->urgency_level = $key;
                 $plan->save();
             }
 
@@ -119,7 +142,18 @@ class PlanController extends Controller
             if ($tasksCount > 0) {
                 throw new \Exception('请先删除计划内任务.');
             }
+            $projectId = $plan->project_id;
             $plan->delete();
+
+            $plans = HPPlan::query()
+                ->where('project_id', $projectId)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            foreach ($plans as $key => $plan) {
+                $plan->urgency_level = $key;
+                $plan->save();
+            }
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
