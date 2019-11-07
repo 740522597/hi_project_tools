@@ -66,7 +66,7 @@ class IPLoginAuth
             return $next($request);
         }
 
-        if (Carbon::parse($ipLogin->last_request_at->addMinutes(5))->lt(Carbon::now())) {
+        if (Carbon::parse($ipLogin->last_request_at)->addMinutes(5)->lt(Carbon::now())) {
             $ipLogin->last_request_at = Carbon::now();
             $ipLogin->save();
             IPLoginRegisterJob::dispatch($ipLogin, $ip);
