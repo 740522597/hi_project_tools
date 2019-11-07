@@ -40,4 +40,10 @@ Route::middleware('ip_login')->prefix('hi-project')->group(function () {
     Route::post('delete-comment', 'HiProject\TaskController@deleteComment');
     Route::post('add-task-comment', 'HiProject\TaskController@addTaskComment');
     Route::post('get-plan', 'HiProject\PlanController@getPlan');
+    Route::post('upload-file', 'HiProject\TaskController@uploadFile');
+    Route::post('get-files', 'HiProject\TaskController@getFiles');
+    Route::post('delete-file', 'HiProject\TaskController@deleteFile');
+    Route::get('task-file/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}/{eight?}/{nine?}',function(){
+        \App\Http\Controllers\ImageRoute::imageStorageRoute();
+    });
 });

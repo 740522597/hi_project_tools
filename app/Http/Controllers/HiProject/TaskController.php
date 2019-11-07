@@ -12,8 +12,11 @@ use App\Models\HPPlan;
 use App\Models\HPProject;
 use App\Models\HPTask;
 use App\TaskComment;
+use App\Upload;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
@@ -36,11 +39,11 @@ class TaskController extends Controller
             }
             $task = HPTask::query()
                 ->firstOrCreate([
-                    'title'       => $title,
-                    'description' => $description,
-                    'plan_id'     => $planId,
-                    'code'        => 0,
-                    'prefix'      => 'TASK',
+                    'title'         => $title,
+                    'description'   => $description,
+                    'plan_id'       => $planId,
+                    'code'          => 0,
+                    'prefix'        => 'TASK',
                     'urgency_level' => -1
                 ]);
             $task->code = $task->id;
@@ -306,6 +309,93 @@ class TaskController extends Controller
                 ->get();
 
             return response()->json(['success' => true, 'comments' => $comments]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function uploadFile(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $task = HPTask::query()
+                ->find($data['task_id']);
+            if (!$task) {
+                throw new \Exception('任务不存在.');
+            }
+            $file = $request->file('file');
+            if (!$file) {
+                throw new \Exception('文件上传失败');
+            }
+            if ($file->isValid()) {
+                $fileExtension = $file->getClientOriginalExtension();
+                if (!in_array($fileExtension, ['png', 'jpg', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'pdf'])) {
+                    throw new \Exception('文件格式不正确');
+                }
+                $tmpFile = $file->getRealPath();
+                $realName = $file -> getClientOriginalName();
+                if (filesize($tmpFile) >= 1024000) {
+                    throw new \Exception('文件大小超过限制');
+                }
+                if (!is_uploaded_file($tmpFile)) {
+                    throw new \Exception('非法上传');
+                }
+                $fileName = date('Y_m_d') . '/' . md5(time()) . mt_rand(0, 9999) . '.' . $fileExtension;
+                if (Storage::disk('public')->put($fileName, file_get_contents($tmpFile))) {
+                    $path = 'app/public/' . $fileName;
+                    Upload::query()
+                        ->firstOrCreate([
+                            'task_id' => $task->id,
+                            'name' => $realName,
+                            'path'    => $path
+                        ]);
+                }
+            }
+            $files = Upload::query()
+                ->where('task_id', $task->id)
+                ->get();
+            return response()->json(['success' => true, 'files' => $files]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function getFiles(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $task = HPTask::query()
+                ->find($data['task_id']);
+            if (!$task) {
+                throw new \Exception('任务不存在.');
+            }
+            $files = Upload::query()
+                ->where('task_id', $task->id)
+                ->get();
+            return response()->json(['success' => true, 'files' => $files]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function deleteFile(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $file = Upload::query()
+                ->find($data['file_id']);
+            if (!$file) {
+                throw new \Exception('文件不存在.');
+            }
+            if (file_exists(storage_path($file->path))) {
+                unlink(storage_path($file->path));
+            }
+            $taskId = $file->task_id;
+            $file->delete();
+            $files = Upload::query()
+                ->where('task_id', $taskId)
+                ->get();
+            return response()->json(['success' => true, 'files' => $files]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
