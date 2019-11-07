@@ -250,4 +250,29 @@ class TaskController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    public function deleteComment(Request $request)
+    {
+        try {
+            $commentId = $request->get('comment_id', null);
+            if (!$commentId) {
+                throw new \Exception('缺少评论ID.');
+            }
+            $comment = TaskComment::query()
+                ->find($commentId);
+            if (!$comment) {
+                throw new \Exception('该评论已被删除.');
+            }
+            $taskId = $comment->task_id;
+            $comment->delete();
+            $comments = TaskComment::query()
+                ->where('task_id', $taskId)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json(['success' => true, 'comments' => $comments]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
 }

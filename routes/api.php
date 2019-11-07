@@ -37,6 +37,7 @@ Route::middleware('ip_login')->prefix('hi-project')->group(function () {
     Route::post('task-status', 'HiProject\TaskController@taskStatus');
     Route::post('load-projects', 'HiProject\ProjectController@loadProjects');
     Route::post('load-comments', 'HiProject\TaskController@loadComments');
+    Route::post('delete-comment', 'HiProject\TaskController@deleteComment');
     Route::post('add-task-comment', 'HiProject\TaskController@addTaskComment');
     Route::post('get-plan', 'HiProject\PlanController@getPlan');
 });
