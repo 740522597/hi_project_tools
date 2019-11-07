@@ -37,9 +37,7 @@ class IPLoginRegisterJob implements ShouldQueue
      */
     public function handle()
     {
-        if ($this->ipLogin == $this->ip
-            &&
-            Carbon::parse($this->ipLogin->last_request_at->addMinutes(5))->lt(Carbon::now())) {
+        if (Carbon::parse($this->ipLogin->last_request_at->addMinutes(5))->lt(Carbon::now())) {
             $msgRepo = new TempMsgRepository();
             $msgRepo->sendIPLoginMsg($this->ipLogin, $this->ip);
             $this->ipLogin->ip = $this->ip;
