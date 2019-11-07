@@ -40,6 +40,7 @@ class IPLoginRegisterJob implements ShouldQueue
         $msgRepo = new TempMsgRepository();
         $msgRepo->sendIPLoginMsg($this->ipLogin, $this->ip);
         $this->ipLogin->ip = $this->ip;
+        $this->ipLogin->login_status = false;
         $this->ipLogin->save();
         WechatUserMsg::query()
             ->firstOrCreate([
