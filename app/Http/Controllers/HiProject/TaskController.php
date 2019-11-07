@@ -11,6 +11,7 @@ namespace App\Http\Controllers\HiProject;
 use App\Models\HPPlan;
 use App\Models\HPProject;
 use App\Models\HPTask;
+use App\TaskComment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -193,6 +194,58 @@ class TaskController extends Controller
             $task->save();
 
             return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function addTaskComment(Request $request)
+    {
+        try {
+            $taskId = $request->get('task_id', null);
+            $content = $request->get('content', null);
+            if (!$taskId || !$content) {
+                throw new \Exception('缺少任务ID或内容.');
+            }
+            $task = HPTask::query()
+                ->find($taskId);
+            if (!$task) {
+                throw new \Exception('该任务已被删除.');
+            }
+            TaskComment::query()
+                ->firstOrCreate([
+                    'task_id' => $task->id,
+                    'content' => $content
+                ]);
+            $comments = TaskComment::query()
+                ->where('task_id', $task->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json(['success' => true, 'comments' => $comments]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function loadComments(Request $request)
+    {
+        try {
+            $taskId = $request->get('task_id', null);
+            if (!$taskId) {
+                throw new \Exception('缺少任务ID.');
+            }
+            $task = HPTask::query()
+                ->find($taskId);
+            if (!$task) {
+                throw new \Exception('该任务已被删除.');
+            }
+            $comments = TaskComment::query()
+                ->where('task_id', $task->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json(['success' => true, 'comments' => $comments]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
