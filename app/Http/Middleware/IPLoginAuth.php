@@ -59,14 +59,16 @@ class IPLoginAuth
         if (!$ipLogin) {
             return response()->json(['success' => false, 'message' => '非法登录.', 'status' => 403]);
         }
-        $ipLogin->last_request_at = Carbon::now();
-        $ipLogin->save();
         if ($ipLogin->ip == $ip && $ipLogin->login_status == true) {
+            $ipLogin->last_request_at = Carbon::now();
+            $ipLogin->save();
             Auth::loginUsingId($user->id);
             return $next($request);
         }
 
-        if (Carbon::parse($this->ipLogin->last_request_at->addMinutes(5))->lt(Carbon::now())) {
+        if (Carbon::parse($ipLogin->last_request_at->addMinutes(5))->lt(Carbon::now())) {
+            $ipLogin->last_request_at = Carbon::now();
+            $ipLogin->save();
             IPLoginRegisterJob::dispatch($ipLogin, $ip);
         }
         return response()->json(['success' => true, 'message' => '请在微信端确认登录', 'status' => 403]);
