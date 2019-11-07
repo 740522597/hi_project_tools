@@ -69,6 +69,7 @@ class PlanController extends Controller
             }
 
             $plans = HPPlan::query()
+                ->where('project_id', $project->id)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
 
