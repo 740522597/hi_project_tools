@@ -21,9 +21,15 @@ class HPTask extends Model
         'estimation',
         'status',
         'urgency_level',
-        'due_at'
+        'due_at',
+        'notified_at'
     ];
     public $appends  = ['is_pass_due'];
+
+    const TASK_STATUS_PENDING = 'PENDING';
+    const TASK_STATUS_DOING = 'DOING';
+    const TASK_STATUS_TESTING = 'TESTING';
+    const TASK_STATUS_DONE = 'DONE';
 
     public function getIsPassDueAttribute()
     {
@@ -31,5 +37,10 @@ class HPTask extends Model
             return true;
         }
         return false;
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(HPPlan::class, 'plan_id', 'id');
     }
 }

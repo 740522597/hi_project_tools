@@ -22,4 +22,9 @@ class HPPlan extends Model
             ->where('status', '<>', 'DONE')
             ->count();
     }
+
+    public function project()
+    {
+        return $this->belongsTo(HPProject::class, 'project_id', 'id');
+    }
 }
