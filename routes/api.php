@@ -21,7 +21,10 @@ Route::prefix('wechat')->group(function () {
     Route::get('msg-receiver', 'Wechat\WechatController@msgReceiver');
     Route::post('msg-receiver', 'Wechat\WechatController@msgReceiver');
 });
-Route::middleware('ip_login')->prefix('hi-project')->group(function () {
+Route::prefix('hi-project')->group(function () {
+    Route::post('login', 'AuthController@login');
+});
+Route::middleware('auth:api')->prefix('hi-project')->group(function () {
 //    Route::get('ip-login', 'API\APIController@ipLogin');
     Route::post('ip-login', 'API\APIController@ipLogin');
     Route::post('add-plan', 'HiProject\PlanController@addPlan');
@@ -43,7 +46,7 @@ Route::middleware('ip_login')->prefix('hi-project')->group(function () {
     Route::post('upload-file', 'HiProject\TaskController@uploadFile');
     Route::post('get-files', 'HiProject\TaskController@getFiles');
     Route::post('delete-file', 'HiProject\TaskController@deleteFile');
-    Route::get('task-file/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}/{eight?}/{nine?}',function(){
+    Route::get('task-file/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}/{eight?}/{nine?}', function () {
         \App\Http\Controllers\ImageRoute::imageStorageRoute();
     });
 });
