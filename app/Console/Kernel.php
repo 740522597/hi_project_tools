@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\PushTaskDueAlert;
 use App\Console\Commands\RunMerchAPIMonitor;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -14,7 +15,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        RunMerchAPIMonitor::class
+        RunMerchAPIMonitor::class,
+        PushTaskDueAlert::class,
     ];
 
     /**
@@ -27,8 +29,9 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
-        $schedule->command('merch:api-monitor')->everyMinute();
-        $schedule->command('ip-login:destroy')->everyMinute();
+        $schedule->command('merch:api-monitor')->everyFiveMinutes();
+//        $schedule->command('ip-login:destroy')->everyMinute();
+        $schedule->command('push:due-tasks')->everyMinute();
     }
 
     /**

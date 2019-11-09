@@ -15,7 +15,7 @@ class PushTaskDueAlert extends Command
      *
      * @var string
      */
-    protected $signature = 'push-due-tasks';
+    protected $signature = 'push:due-tasks';
 
     /**
      * The console command description.
