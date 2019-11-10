@@ -8,6 +8,8 @@
 
 namespace App\Http\Controllers\HiProject;
 
+use App\ArchivedPlan;
+use App\ArchivedTask;
 use App\Models\HPPlan;
 use App\Models\HPProject;
 use App\Models\HPTask;
@@ -154,6 +156,51 @@ class PlanController extends Controller
                 $plan->urgency_level = $key;
                 $plan->save();
             }
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function archivePlan(Request $request)
+    {
+        try {
+            $planId = $request->get('plan_id', null);
+            if (!$planId) {
+                throw new \Exception('缺少计划ID.');
+            }
+            $plan = HPPlan::query()
+                ->find($planId);
+            if (!$plan) {
+                throw new \Exception('该计划已被删除.');
+            }
+            $tasksCount = HPTask::query()
+                ->where('plan_id', $planId)
+                ->whereNotIn('status', ['DONE'])
+                ->count();
+
+            if ($tasksCount > 0) {
+                throw new \Exception('请先完成计划内任务.');
+            }
+            $planArray = $plan->toArray();
+            unset($planArray['unfinished_count']);
+
+            ArchivedPlan::query()
+                ->firstOrCreate($planArray);
+
+            $tasks = HPTask::query()
+                ->where('plan_id', $plan->id)
+                ->get();
+
+            foreach ($tasks as $task) {
+                $taskArray = $task->toArray();
+                unset($taskArray['is_pass_due']);
+                ArchivedTask::query()
+                    ->firstOrCreate($taskArray);
+                $task->delete();
+            }
+            $plan->delete();
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
