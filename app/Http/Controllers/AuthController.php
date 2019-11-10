@@ -29,7 +29,7 @@ class AuthController extends Controller
     public function logout()
     {
         auth()->logout();
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['success' => true, 'message' => 'Successfully logged out']);
     }
 
     public function refresh()
@@ -42,7 +42,8 @@ class AuthController extends Controller
         return response()->json(['success' => true, 'token' => [
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => auth()->factory()->getTTL() * 120,
+            'user' => auth()->user()
         ]]);
     }
 }
