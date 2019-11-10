@@ -13,6 +13,7 @@ use App\Models\HPProject;
 use App\Models\HPTask;
 use App\TaskComment;
 use App\Upload;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -94,6 +95,44 @@ class TaskController extends Controller
 
             $tasks = HPTask::query()
                 ->where('plan_id', $plan->id)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            return response()->json(['success' => true, 'tasks' => $tasks]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function loadGoalTasks(Request $request)
+    {
+        try {
+            $projectId = $request->get('project_id', null);
+            $status = $request->get('status', null);
+            $goalType = $request->get('goal_type', null);
+            if (!$projectId || !$status || !$goalType) {
+                throw new \Exception('缺少参数.');
+            }
+            $time = null;
+            if ($goalType == 'MONTH') {
+                $time = Carbon::now()->endOfMonth()->format('Y-m-d H:i:s');
+            }
+            if ($goalType === 'WEEK') {
+                $time = Carbon::now()->endOfWeek()->format('Y-m-d H:i:s');
+            }
+
+            if (!$time) {
+                throw new \Exception('任务追踪目标不正确.');
+            }
+
+            $planIds = HPPlan::query()
+                ->where('project_id', $projectId)
+                ->pluck('id');
+
+            $tasks = HPTask::query()
+                ->whereIn('plan_id', $planIds)
+                ->where('due_at', '<', $time)
+                ->where('status', $status)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
 
@@ -333,7 +372,7 @@ class TaskController extends Controller
                     throw new \Exception('文件格式不正确');
                 }
                 $tmpFile = $file->getRealPath();
-                $realName = $file -> getClientOriginalName();
+                $realName = $file->getClientOriginalName();
                 if (filesize($tmpFile) >= 1024000) {
                     throw new \Exception('文件大小超过限制');
                 }
@@ -346,7 +385,7 @@ class TaskController extends Controller
                     Upload::query()
                         ->firstOrCreate([
                             'task_id' => $task->id,
-                            'name' => $realName,
+                            'name'    => $realName,
                             'path'    => $path
                         ]);
                 }

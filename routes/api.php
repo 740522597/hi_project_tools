@@ -37,6 +37,7 @@ Route::middleware('auth:api')->prefix('hi-project')->group(function () {
     Route::post('update-task-level', 'HiProject\TaskController@updateTaskLevel');
     Route::post('plan-list', 'HiProject\PlanController@planList');
     Route::post('task-list', 'HiProject\TaskController@taskList');
+    Route::post('load-goal-tasks', 'HiProject\TaskController@loadGoalTasks');
     Route::post('add-task', 'HiProject\TaskController@addTask');
     Route::post('update-task', 'HiProject\TaskController@updateTask');
     Route::post('task-details', 'HiProject\TaskController@taskDetails');
