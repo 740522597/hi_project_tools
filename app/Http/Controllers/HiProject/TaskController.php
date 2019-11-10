@@ -108,9 +108,8 @@ class TaskController extends Controller
     {
         try {
             $projectId = $request->get('project_id', null);
-            $status = $request->get('status', null);
             $goalType = $request->get('goal_type', null);
-            if (!$projectId || !$status || !$goalType) {
+            if (!$projectId || !$goalType) {
                 throw new \Exception('缺少参数.');
             }
             $time = null;
@@ -129,10 +128,31 @@ class TaskController extends Controller
                 ->where('project_id', $projectId)
                 ->pluck('id');
 
-            $tasks = HPTask::query()
+            $tasks[HPTask::TASK_STATUS_PENDING] = HPTask::query()
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '<', $time)
-                ->where('status', $status)
+                ->where('status', HPTask::TASK_STATUS_PENDING)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            $tasks[HPTask::TASK_STATUS_DOING] = HPTask::query()
+                ->whereIn('plan_id', $planIds)
+                ->where('due_at', '<', $time)
+                ->where('status', HPTask::TASK_STATUS_DOING)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            $tasks[HPTask::TASK_STATUS_TESTING] = HPTask::query()
+                ->whereIn('plan_id', $planIds)
+                ->where('due_at', '<', $time)
+                ->where('status', HPTask::TASK_STATUS_TESTING)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
+
+            $tasks[HPTask::TASK_STATUS_DONE] = HPTask::query()
+                ->whereIn('plan_id', $planIds)
+                ->where('due_at', '<', $time)
+                ->where('status', HPTask::TASK_STATUS_DONE)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
 
