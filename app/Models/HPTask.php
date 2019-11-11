@@ -43,4 +43,9 @@ class HPTask extends Model
     {
         return $this->belongsTo(HPPlan::class, 'plan_id', 'id');
     }
+
+    public function sub_tasks()
+    {
+        return $this->hasMany(SubTask::class, 'task_id', 'id');
+    }
 }

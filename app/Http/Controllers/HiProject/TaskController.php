@@ -11,6 +11,7 @@ namespace App\Http\Controllers\HiProject;
 use App\Models\HPPlan;
 use App\Models\HPProject;
 use App\Models\HPTask;
+use App\Models\SubTask;
 use App\TaskComment;
 use App\Upload;
 use Carbon\Carbon;
@@ -95,6 +96,7 @@ class TaskController extends Controller
 
             $tasks = HPTask::query()
                 ->where('plan_id', $plan->id)
+                ->with('plan', 'sub_tasks')
                 ->orderBy('urgency_level', 'asc')
                 ->get();
 
@@ -132,7 +134,7 @@ class TaskController extends Controller
                 ->pluck('id');
 
             $tasks[HPTask::TASK_STATUS_PENDING] = HPTask::query()
-                ->with('plan')
+                ->with('plan', 'sub_tasks')
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '>', $timeFrom)
                 ->where('due_at', '<', $timeTo)
@@ -141,7 +143,7 @@ class TaskController extends Controller
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_DOING] = HPTask::query()
-                ->with('plan')
+                ->with('plan', 'sub_tasks')
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '>', $timeFrom)
                 ->where('due_at', '<', $timeTo)
@@ -150,7 +152,7 @@ class TaskController extends Controller
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_TESTING] = HPTask::query()
-                ->with('plan')
+                ->with('plan', 'sub_tasks')
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '>', $timeFrom)
                 ->where('due_at', '<', $timeTo)
@@ -159,7 +161,7 @@ class TaskController extends Controller
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_DONE] = HPTask::query()
-                ->with('plan')
+                ->with('plan', 'sub_tasks')
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '>', $timeFrom)
                 ->where('due_at', '<', $timeTo)
@@ -181,6 +183,7 @@ class TaskController extends Controller
                 throw new \Exception('缺少任务ID');
             }
             $task = HPTask::query()
+                ->with('sub_tasks')
                 ->find($taskId);
             if (!$task) {
                 throw new \Exception('未能找到对应的任务');
@@ -466,6 +469,103 @@ class TaskController extends Controller
                 ->where('task_id', $taskId)
                 ->get();
             return response()->json(['success' => true, 'files' => $files]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function addSubTask(Request $request)
+    {
+        try {
+            $title = $request->get('title', null);
+            $taskId = $request->get('task_id', null);
+            $id = $request->get('id', null);
+            if (!$title || !$taskId) {
+                throw new \Exception('缺少参数.');
+            }
+            if ($id) {
+                $subTask = SubTask::query()
+                    ->find($id);
+                $subTask->title = $title;
+                $subTask->save();
+            } else {
+                SubTask::query()
+                    ->firstOrCreate([
+                        'title' => $title,
+                        'task_id' => $taskId,
+                        'created_by' => auth()->user()->id
+                    ]);
+            }
+            $subTasks = SubTask::query()
+                ->where('task_id', $taskId)
+                ->orderBy('id', 'desc')
+                ->get();
+
+            return response()->json(['success' => true, 'sub_tasks' => $subTasks]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function subTaskList(Request $request)
+    {
+        try {
+            $taskId = $request->get('task_id', null);
+            if (!$taskId) {
+                throw new \Exception('缺少参数.');
+            }
+            $subTasks = SubTask::query()
+                ->where('task_id', $taskId)
+                ->orderBy('id', 'desc')
+                ->get();
+
+            return response()->json(['success' => true, 'sub_tasks' => $subTasks]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function deleteSubTask(Request $request)
+    {
+        try {
+            $id = $request->get('id', null);
+            if (!$id) {
+                throw new \Exception('缺少参数.');
+            }
+            $subTask = SubTask::query()
+                ->find($id);
+            $taskId = $subTask->task_id;
+            $subTask->delete();
+
+            $subTasks = SubTask::query()
+                ->where('task_id', $taskId)
+                ->orderBy('id', 'desc')
+                ->get();
+
+            return response()->json(['success' => true, 'sub_tasks' => $subTasks]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function finishSubTask(Request $request)
+    {
+        try {
+            $id = $request->get('id', null);
+            if (!$id) {
+                throw new \Exception('缺少参数.');
+            }
+            $subTask = SubTask::query()
+                ->find($id);
+            $subTask->is_finished = (boolean)!$subTask->is_finished;
+            $subTask->save();
+
+            $subTasks = SubTask::query()
+                ->where('task_id', $subTask->task_id)
+                ->orderBy('id', 'desc')
+                ->get();
+
+            return response()->json(['success' => true, 'sub_tasks' => $subTasks]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
