@@ -139,7 +139,7 @@ class TaskController extends Controller
                 ->where('due_at', '>', $timeFrom)
                 ->where('due_at', '<', $timeTo)
                 ->where('status', HPTask::TASK_STATUS_PENDING)
-                ->orderBy('urgency_level', 'asc')
+                ->orderBy('due_at', 'asc')
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_DOING] = HPTask::query()
@@ -148,7 +148,7 @@ class TaskController extends Controller
                 ->where('due_at', '>', $timeFrom)
                 ->where('due_at', '<', $timeTo)
                 ->where('status', HPTask::TASK_STATUS_DOING)
-                ->orderBy('urgency_level', 'asc')
+                ->orderBy('due_at', 'asc')
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_TESTING] = HPTask::query()
@@ -157,7 +157,7 @@ class TaskController extends Controller
                 ->where('due_at', '>', $timeFrom)
                 ->where('due_at', '<', $timeTo)
                 ->where('status', HPTask::TASK_STATUS_TESTING)
-                ->orderBy('urgency_level', 'asc')
+                ->orderBy('due_at', 'asc')
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_DONE] = HPTask::query()
@@ -166,7 +166,7 @@ class TaskController extends Controller
                 ->where('due_at', '>', $timeFrom)
                 ->where('due_at', '<', $timeTo)
                 ->where('status', HPTask::TASK_STATUS_DONE)
-                ->orderBy('urgency_level', 'asc')
+                ->orderBy('due_at', 'asc')
                 ->get();
 
             return response()->json(['success' => true, 'tasks' => $tasks]);
