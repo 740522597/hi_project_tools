@@ -15,7 +15,7 @@ class AuthController extends Controller
     public function login()
     {
         $credentials = \request(['name', 'password']);
-        if (!$token = auth()->attempt($credentials)) {
+        if (!$token = auth()->setTTL(60 * 60 * 24 * 365)->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         return $this->respondWithToken($token);
@@ -23,7 +23,7 @@ class AuthController extends Controller
 
     public function me()
     {
-        return response()->json(auth()->user());
+        return response()->json(['success' => true, 'user' => auth()->user()]);
     }
 
     public function logout()
@@ -42,7 +42,7 @@ class AuthController extends Controller
         return response()->json(['success' => true, 'token' => [
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 120,
+            'expires_in' => auth()->factory()->getTTL(),
             'user' => auth()->user()
         ]]);
     }

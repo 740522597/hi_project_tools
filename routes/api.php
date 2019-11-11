@@ -57,4 +57,5 @@ Route::middleware('auth:api')->prefix('hi-project')->group(function () {
     Route::post('archived-get-files', 'HiProject\ArchivedTaskController@getFiles');
     Route::post('delete-file', 'HiProject\TaskController@deleteFile');
     Route::post('logout', 'AuthController@logout');
+    Route::post('me', 'AuthController@me');
 });
