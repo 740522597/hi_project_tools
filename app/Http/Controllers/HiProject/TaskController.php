@@ -112,15 +112,18 @@ class TaskController extends Controller
             if (!$projectId || !$goalType) {
                 throw new \Exception('缺少参数.');
             }
-            $time = null;
+            $timeFrom = null;
+            $timeTo = null;
             if ($goalType == 'MONTH') {
-                $time = Carbon::now()->endOfMonth()->format('Y-m-d H:i:s');
+                $timeFrom = Carbon::now()->startOfMonth()->format('Y-m-d H:i:s');
+                $timeTo = Carbon::now()->endOfMonth()->format('Y-m-d H:i:s');
             }
             if ($goalType === 'WEEK') {
-                $time = Carbon::now()->endOfWeek()->format('Y-m-d H:i:s');
+                $timeFrom = Carbon::now()->startOfWeek()->format('Y-m-d H:i:s');
+                $timeTo = Carbon::now()->endOfWeek()->format('Y-m-d H:i:s');
             }
 
-            if (!$time) {
+            if (!$timeTo || !$timeFrom) {
                 throw new \Exception('任务追踪目标不正确.');
             }
 
@@ -131,7 +134,8 @@ class TaskController extends Controller
             $tasks[HPTask::TASK_STATUS_PENDING] = HPTask::query()
                 ->with('plan')
                 ->whereIn('plan_id', $planIds)
-                ->where('due_at', '<', $time)
+                ->where('due_at', '>', $timeFrom)
+                ->where('due_at', '<', $timeTo)
                 ->where('status', HPTask::TASK_STATUS_PENDING)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -139,7 +143,8 @@ class TaskController extends Controller
             $tasks[HPTask::TASK_STATUS_DOING] = HPTask::query()
                 ->with('plan')
                 ->whereIn('plan_id', $planIds)
-                ->where('due_at', '<', $time)
+                ->where('due_at', '>', $timeFrom)
+                ->where('due_at', '<', $timeTo)
                 ->where('status', HPTask::TASK_STATUS_DOING)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -147,7 +152,8 @@ class TaskController extends Controller
             $tasks[HPTask::TASK_STATUS_TESTING] = HPTask::query()
                 ->with('plan')
                 ->whereIn('plan_id', $planIds)
-                ->where('due_at', '<', $time)
+                ->where('due_at', '>', $timeFrom)
+                ->where('due_at', '<', $timeTo)
                 ->where('status', HPTask::TASK_STATUS_TESTING)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -155,7 +161,8 @@ class TaskController extends Controller
             $tasks[HPTask::TASK_STATUS_DONE] = HPTask::query()
                 ->with('plan')
                 ->whereIn('plan_id', $planIds)
-                ->where('due_at', '<', $time)
+                ->where('due_at', '>', $timeFrom)
+                ->where('due_at', '<', $timeTo)
                 ->where('status', HPTask::TASK_STATUS_DONE)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
