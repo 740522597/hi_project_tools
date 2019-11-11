@@ -129,6 +129,7 @@ class TaskController extends Controller
                 ->pluck('id');
 
             $tasks[HPTask::TASK_STATUS_PENDING] = HPTask::query()
+                ->with('plan')
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '<', $time)
                 ->where('status', HPTask::TASK_STATUS_PENDING)
@@ -136,6 +137,7 @@ class TaskController extends Controller
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_DOING] = HPTask::query()
+                ->with('plan')
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '<', $time)
                 ->where('status', HPTask::TASK_STATUS_DOING)
@@ -143,6 +145,7 @@ class TaskController extends Controller
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_TESTING] = HPTask::query()
+                ->with('plan')
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '<', $time)
                 ->where('status', HPTask::TASK_STATUS_TESTING)
@@ -150,6 +153,7 @@ class TaskController extends Controller
                 ->get();
 
             $tasks[HPTask::TASK_STATUS_DONE] = HPTask::query()
+                ->with('plan')
                 ->whereIn('plan_id', $planIds)
                 ->where('due_at', '<', $time)
                 ->where('status', HPTask::TASK_STATUS_DONE)
