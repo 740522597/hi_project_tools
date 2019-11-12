@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\TaskComment;
+use App\Upload;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -47,5 +49,15 @@ class HPTask extends Model
     public function sub_tasks()
     {
         return $this->hasMany(SubTask::class, 'task_id', 'id');
+    }
+
+    public function files()
+    {
+        return $this->hasMany(Upload::class, 'task_id', 'id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(TaskComment::class, 'task_id', 'id');
     }
 }

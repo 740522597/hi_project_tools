@@ -183,7 +183,15 @@ class TaskController extends Controller
                 throw new \Exception('缺少任务ID');
             }
             $task = HPTask::query()
-                ->with('sub_tasks')
+                ->with(['sub_tasks' => function ($query) {
+                    $query->orderBy('id', 'desc');
+                }])
+                ->with(['comments' => function ($query) {
+                    $query->orderBy('id', 'desc');
+                }])
+                ->with(['files' => function ($query) {
+                    $query->orderBy('id', 'desc');
+                }])
                 ->find($taskId);
             if (!$task) {
                 throw new \Exception('未能找到对应的任务');
@@ -304,7 +312,7 @@ class TaskController extends Controller
             $task->status = $status;
             $task->save();
 
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'task' => $task]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
