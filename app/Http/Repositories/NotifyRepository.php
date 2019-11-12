@@ -18,9 +18,6 @@ class NotifyRepository
     public $notify = [];
     public function __construct()
     {
-        $notifies = [
-          'TASK_DUE'
-        ];
     }
 
     public function gatherNotify()
