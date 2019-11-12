@@ -25,7 +25,7 @@ class NotifyController extends Controller
     {
         try {
             $notify = $this->repo->gatherNotify();
-            if ($notify) {
+            if (!$notify) {
                 throw new \Exception('No more notifies.');
             }
             return response()->json(['success' => true, 'notify' => $notify]);
