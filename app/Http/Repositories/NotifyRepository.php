@@ -29,7 +29,7 @@ class NotifyRepository
             ->where('type', Notify::TYPE_TASK_DUE)
             ->whereNull('notified_at')
             ->get();
-        if (count($notifies)) {
+        if (count($notifies) <= 0) {
             return null;
         }
         foreach ($notifies as $notify) {
