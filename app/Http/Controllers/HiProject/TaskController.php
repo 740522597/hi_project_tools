@@ -104,6 +104,7 @@ class TaskController extends Controller
 
             $plans = HPPlan::query()
                 ->where('project_id', $plan->project_id)
+                ->orderBy('urgency_level', 'asc')
                 ->get();
 
             $tasks = HPTask::query()
