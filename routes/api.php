@@ -75,4 +75,7 @@ Route::middleware('auth:api')->prefix('hi-project')->group(function () {
     //AuthController
     Route::post('logout', 'AuthController@logout');
     Route::post('me', 'AuthController@me');
+
+    //Notify
+    Route::post('notify', 'API\NotifyController@notify');
 });

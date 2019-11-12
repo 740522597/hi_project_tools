@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\GatherNotify;
 use App\Console\Commands\PushTaskDueAlert;
 use App\Console\Commands\RunMerchAPIMonitor;
 use Illuminate\Console\Scheduling\Schedule;
@@ -17,6 +18,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         RunMerchAPIMonitor::class,
         PushTaskDueAlert::class,
+        GatherNotify::class,
     ];
 
     /**
@@ -32,6 +34,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('merch:api-monitor')->everyFiveMinutes();
 //        $schedule->command('ip-login:destroy')->everyMinute();
         $schedule->command('push:due-tasks')->everyMinute();
+        $schedule->command('notify:gather')->everyMinute();
     }
 
     /**
