@@ -8,6 +8,7 @@
 
 namespace App\Http\Controllers\HiProject;
 
+use App\Http\Repositories\HiProject\TaskRepository;
 use App\Models\HPPlan;
 use App\Models\HPProject;
 use App\Models\HPTask;
@@ -22,6 +23,13 @@ use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
+    public $repo = null;
+
+    public function __construct()
+    {
+        $this->repo = new TaskRepository();
+    }
+
     public function addTask(Request $request)
     {
         try {
@@ -94,13 +102,17 @@ class TaskController extends Controller
                 throw new \Exception('未能找到该计划');
             }
 
+            $plans = HPPlan::query()
+                ->where('project_id', $plan->project_id)
+                ->get();
+
             $tasks = HPTask::query()
                 ->where('plan_id', $plan->id)
                 ->with('plan', 'sub_tasks')
                 ->orderBy('urgency_level', 'asc')
                 ->get();
 
-            return response()->json(['success' => true, 'tasks' => $tasks]);
+            return response()->json(['success' => true, 'tasks' => $tasks, 'plans' => $plans]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
@@ -111,65 +123,10 @@ class TaskController extends Controller
         try {
             $projectId = $request->get('project_id', null);
             $goalType = $request->get('goal_type', null);
-            if (!$projectId || !$goalType) {
-                throw new \Exception('缺少参数.');
-            }
-            $timeFrom = null;
-            $timeTo = null;
-            if ($goalType == 'MONTH') {
-                $timeFrom = Carbon::now()->startOfMonth()->format('Y-m-d H:i:s');
-                $timeTo = Carbon::now()->endOfMonth()->format('Y-m-d H:i:s');
-            }
-            if ($goalType === 'WEEK') {
-                $timeFrom = Carbon::now()->startOfWeek()->format('Y-m-d H:i:s');
-                $timeTo = Carbon::now()->endOfWeek()->format('Y-m-d H:i:s');
-            }
+            $tasks = $this->repo->getGoalTasks($projectId, $goalType);
+            $projects = HPProject::query()->orderBy('id', 'desc')->get();
 
-            if (!$timeTo || !$timeFrom) {
-                throw new \Exception('任务追踪目标不正确.');
-            }
-
-            $planIds = HPPlan::query()
-                ->where('project_id', $projectId)
-                ->pluck('id');
-
-            $tasks[HPTask::TASK_STATUS_PENDING] = HPTask::query()
-                ->with('plan', 'sub_tasks')
-                ->whereIn('plan_id', $planIds)
-                ->where('due_at', '>', $timeFrom)
-                ->where('due_at', '<', $timeTo)
-                ->where('status', HPTask::TASK_STATUS_PENDING)
-                ->orderBy('due_at', 'asc')
-                ->get();
-
-            $tasks[HPTask::TASK_STATUS_DOING] = HPTask::query()
-                ->with('plan', 'sub_tasks')
-                ->whereIn('plan_id', $planIds)
-                ->where('due_at', '>', $timeFrom)
-                ->where('due_at', '<', $timeTo)
-                ->where('status', HPTask::TASK_STATUS_DOING)
-                ->orderBy('due_at', 'asc')
-                ->get();
-
-            $tasks[HPTask::TASK_STATUS_TESTING] = HPTask::query()
-                ->with('plan', 'sub_tasks')
-                ->whereIn('plan_id', $planIds)
-                ->where('due_at', '>', $timeFrom)
-                ->where('due_at', '<', $timeTo)
-                ->where('status', HPTask::TASK_STATUS_TESTING)
-                ->orderBy('due_at', 'asc')
-                ->get();
-
-            $tasks[HPTask::TASK_STATUS_DONE] = HPTask::query()
-                ->with('plan', 'sub_tasks')
-                ->whereIn('plan_id', $planIds)
-                ->where('due_at', '>', $timeFrom)
-                ->where('due_at', '<', $timeTo)
-                ->where('status', HPTask::TASK_STATUS_DONE)
-                ->orderBy('due_at', 'asc')
-                ->get();
-
-            return response()->json(['success' => true, 'tasks' => $tasks]);
+            return response()->json(['success' => true, 'tasks' => $tasks, 'projects' => $projects]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
@@ -301,18 +258,32 @@ class TaskController extends Controller
         try {
             $taskId = $request->get('id', null);
             $status = $request->get('status', null);
+            $goalType = $request->get('goal_type', null);
             if (!$taskId || !$status) {
                 throw new \Exception('缺少任务ID或状态.');
             }
             $task = HPTask::query()
+                ->with('plan.project')
                 ->find($taskId);
-            if (!$task) {
+            if (!$task || !$task->plan || !$task->plan->project) {
                 throw new \Exception('该任务已被删除.');
             }
             $task->status = $status;
             $task->save();
+            if ($goalType) {
+                $tasks = $this->repo->getGoalTasks($task->plan->project->id, $goalType);
+            } else {
+                $tasks = HPTask::query()
+                    ->where('plan_id', $task->plan_id)
+                    ->orderBy('urgency_level', 'asc')
+                    ->get();
+            }
+            $plans = HPPlan::query()
+                ->where('project_id', $task->plan->project->id)
+                ->orderBy('urgency_level', 'asc')
+                ->get();
 
-            return response()->json(['success' => true, 'task' => $task]);
+            return response()->json(['success' => true, 'task' => $task, 'tasks' => $tasks, 'plans' => $plans]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }

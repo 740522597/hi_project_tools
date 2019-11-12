@@ -87,7 +87,9 @@ class PlanController extends Controller
                 ->orderBy('urgency_level', 'asc')
                 ->get();
 
-            return response()->json(['success' => true, 'plans' => $plans]);
+            $projects = HPProject::query()->orderBy('id', 'desc')->get();
+
+            return response()->json(['success' => true, 'plans' => $plans, 'projects' => $projects]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }

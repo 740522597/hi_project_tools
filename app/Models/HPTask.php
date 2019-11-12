@@ -26,7 +26,7 @@ class HPTask extends Model
         'due_at',
         'notified_at'
     ];
-    public $appends  = ['is_pass_due'];
+    public $appends  = ['is_pass_due', 'sub_tasks_finished'];
 
     const TASK_STATUS_PENDING = 'PENDING';
     const TASK_STATUS_DOING = 'DOING';
@@ -39,6 +39,18 @@ class HPTask extends Model
             return true;
         }
         return false;
+    }
+
+    public function getSubTasksFinishedAttribute()
+    {
+        $this->load('sub_tasks');
+        $count = 0;
+        foreach ($this->sub_tasks as $subTask) {
+            if ($subTask->is_finished) {
+                $count++;
+            }
+        }
+        return $count;
     }
 
     public function plan()
