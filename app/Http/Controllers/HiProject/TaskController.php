@@ -264,10 +264,13 @@ class TaskController extends Controller
                 throw new \Exception('缺少任务ID或状态.');
             }
             $task = HPTask::query()
-                ->with('plan.project')
+                ->with('plan.project', 'sub_tasks')
                 ->find($taskId);
             if (!$task || !$task->plan || !$task->plan->project) {
                 throw new \Exception('该任务已被删除.');
+            }
+            if (count($task->sub_tasks) != $task->sub_tasks_finished && $status == HPTask::TASK_STATUS_DONE) {
+                throw new \Exception('该任务中有子任务未完成.');
             }
             $task->status = $status;
             $task->save();
