@@ -42,6 +42,7 @@ class GatherNotify extends Command
     {
         $tasks = HPTask::query()
             ->where('due_at', '<', Carbon::now())
+            ->where('status', '<>', HPTask::TASK_STATUS_DONE)
             ->get();
         foreach ($tasks as $task) {
             $notify = Notify::query()
