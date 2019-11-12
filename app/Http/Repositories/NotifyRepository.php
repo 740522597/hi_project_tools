@@ -29,7 +29,9 @@ class NotifyRepository
             ->where('type', Notify::TYPE_TASK_DUE)
             ->whereNull('notified_at')
             ->get();
-
+        if (count($notifies)) {
+            return null;
+        }
         foreach ($notifies as $notify) {
             $notify->notified_at = Carbon::now();
             $notify->save();
