@@ -11,6 +11,7 @@ class HPProject extends Model
     public $fillable = [
       'name',
       'description',
-      'prefix'
+      'prefix',
+      'created_by'
     ];
 }

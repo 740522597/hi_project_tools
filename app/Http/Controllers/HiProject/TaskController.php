@@ -41,25 +41,26 @@ class TaskController extends Controller
             if (!$title || !$planId || !$description) {
                 throw new \Exception('请检查必填内容.');
             }
-            $plan = HPPlan::query()
+            $plan = $this->myQuery(HPPlan::query())
                 ->find($planId);
 
             if (!$plan) {
                 throw new \Exception('目标计划不存在.');
             }
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->firstOrCreate([
                     'title'         => $title,
                     'description'   => $description,
                     'plan_id'       => $planId,
                     'code'          => 0,
                     'prefix'        => 'TASK',
-                    'urgency_level' => -1
+                    'urgency_level' => -1,
+                    'created_by' => auth()->user()->id
                 ]);
             $task->code = $task->id;
             $task->due_at = $dueAt;
 
-            $project = HPProject::query()
+            $project = $this->myQuery(HPProject::query())
                 ->where('id', $plan->project_id)
                 ->first();
             if (!$project) {
@@ -68,7 +69,7 @@ class TaskController extends Controller
             $task->prefix = $project->prefix;
             $task->save();
 
-            $tasks = HPTask::query()
+            $tasks = $this->myQuery(HPTask::query())
                 ->where('plan_id', $planId)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -78,7 +79,7 @@ class TaskController extends Controller
                 $task->save();
             }
 
-            $tasks = HPTask::query()
+            $tasks = $this->myQuery(HPTask::query())
                 ->where('plan_id', $planId)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -95,19 +96,19 @@ class TaskController extends Controller
             if (!$planId) {
                 throw new \Exception('缺少计划ID.');
             }
-            $plan = HPPlan::query()
+            $plan = $this->myQuery(HPPlan::query())
                 ->where('id', $planId)
                 ->first();
             if (!$plan) {
                 throw new \Exception('未能找到该计划');
             }
 
-            $plans = HPPlan::query()
+            $plans = $this->myQuery(HPPlan::query())
                 ->where('project_id', $plan->project_id)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
 
-            $tasks = HPTask::query()
+            $tasks = $this->myQuery(HPTask::query())
                 ->where('plan_id', $plan->id)
                 ->with('plan', 'sub_tasks')
                 ->orderBy('urgency_level', 'asc')
@@ -125,7 +126,7 @@ class TaskController extends Controller
             $projectId = $request->get('project_id', null);
             $goalType = $request->get('goal_type', null);
             $tasks = $this->repo->getGoalTasks($projectId, $goalType);
-            $projects = HPProject::query()->orderBy('id', 'desc')->get();
+            $projects = $this->myQuery(HPProject::query())->orderBy('id', 'desc')->get();
 
             return response()->json(['success' => true, 'tasks' => $tasks, 'projects' => $projects]);
         } catch (\Exception $e) {
@@ -140,7 +141,7 @@ class TaskController extends Controller
             if (!$taskId) {
                 throw new \Exception('缺少任务ID');
             }
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->with(['sub_tasks' => function ($query) {
                     $query->orderBy('id', 'desc');
                 }])
@@ -171,7 +172,7 @@ class TaskController extends Controller
             if (!$taskId || !$title || !$description) {
                 throw new \Exception('缺少必填项.');
             }
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->find($taskId);
             if (!$task) {
                 throw new \Exception('未能找到对应的任务');
@@ -196,7 +197,7 @@ class TaskController extends Controller
             $levels = $request->all();
             $taskIds = [];
             foreach ($levels as $taskId => $level) {
-                $task = HPTask::query()
+                $task = $this->myQuery(HPTask::query())
                     ->find($taskId);
                 if (!$task) {
                     throw new \Exception('未找到对应任务.');
@@ -206,7 +207,7 @@ class TaskController extends Controller
                 $task->save();
             }
 
-            $tasks = HPTask::query()
+            $tasks = $this->myQuery(HPTask::query())
                 ->whereIn('id', $taskIds)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -229,7 +230,7 @@ class TaskController extends Controller
             if (!$taskId) {
                 throw new \Exception('缺少任务ID.');
             }
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->find($taskId);
             if (!$task) {
                 throw new \Exception('该任务已被删除.');
@@ -238,7 +239,7 @@ class TaskController extends Controller
             $planId = $task->planId;
             $task->delete();
 
-            $tasks = HPTask::query()
+            $tasks = $this->myQuery(HPTask::query())
                 ->where('plan_id', $planId)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -263,7 +264,7 @@ class TaskController extends Controller
             if (!$taskId || !$status) {
                 throw new \Exception('缺少任务ID或状态.');
             }
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->with('plan.project', 'sub_tasks')
                 ->find($taskId);
             if (!$task || !$task->plan || !$task->plan->project) {
@@ -277,12 +278,12 @@ class TaskController extends Controller
             if ($goalType) {
                 $tasks = $this->repo->getGoalTasks($task->plan->project->id, $goalType);
             } else {
-                $tasks = HPTask::query()
+                $tasks = $this->myQuery(HPTask::query())
                     ->where('plan_id', $task->plan_id)
                     ->orderBy('urgency_level', 'asc')
                     ->get();
             }
-            $plans = HPPlan::query()
+            $plans = $this->myQuery(HPPlan::query())
                 ->where('project_id', $task->plan->project->id)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -301,17 +302,18 @@ class TaskController extends Controller
             if (!$taskId || !$content) {
                 throw new \Exception('缺少任务ID或内容.');
             }
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->find($taskId);
             if (!$task) {
                 throw new \Exception('该任务已被删除.');
             }
-            TaskComment::query()
+            $this->myQuery(TaskComment::query())
                 ->firstOrCreate([
                     'task_id' => $task->id,
-                    'content' => $content
+                    'content' => $content,
+                    'created_by' => auth()->user()->id
                 ]);
-            $comments = TaskComment::query()
+            $comments = $this->myQuery(TaskComment::query())
                 ->where('task_id', $task->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -329,12 +331,12 @@ class TaskController extends Controller
             if (!$taskId) {
                 throw new \Exception('缺少任务ID.');
             }
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->find($taskId);
             if (!$task) {
                 throw new \Exception('该任务已被删除.');
             }
-            $comments = TaskComment::query()
+            $comments = $this->myQuery(TaskComment::query())
                 ->where('task_id', $task->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -352,14 +354,14 @@ class TaskController extends Controller
             if (!$commentId) {
                 throw new \Exception('缺少评论ID.');
             }
-            $comment = TaskComment::query()
+            $comment = $this->myQuery(TaskComment::query())
                 ->find($commentId);
             if (!$comment) {
                 throw new \Exception('该评论已被删除.');
             }
             $taskId = $comment->task_id;
             $comment->delete();
-            $comments = TaskComment::query()
+            $comments = $this->myQuery(TaskComment::query())
                 ->where('task_id', $taskId)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -374,7 +376,7 @@ class TaskController extends Controller
     {
         try {
             $data = $request->all();
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->find($data['task_id']);
             if (!$task) {
                 throw new \Exception('任务不存在.');
@@ -419,7 +421,7 @@ class TaskController extends Controller
     {
         try {
             $data = $request->all();
-            $task = HPTask::query()
+            $task = $this->myQuery(HPTask::query())
                 ->find($data['task_id']);
             if (!$task) {
                 throw new \Exception('任务不存在.');

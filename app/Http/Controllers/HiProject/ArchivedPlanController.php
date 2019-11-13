@@ -25,14 +25,14 @@ class ArchivedPlanController extends Controller
             if (!$projectId) {
                 throw new \Exception('缺少项目ID.');
             }
-            $project = HPProject::query()
+            $project = $this->myQuery(HPProject::query())
                 ->where('id', $projectId)
                 ->first();
             if (!$project) {
                 throw new \Exception('未能找到该项目');
             }
 
-            $plans = ArchivedPlan::query()
+            $plans = $this->myQuery(ArchivedPlan::query())
                 ->where('project_id', $project->id)
                 ->orderBy('id', 'desc')
                 ->get();

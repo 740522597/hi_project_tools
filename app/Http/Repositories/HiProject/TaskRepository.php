@@ -11,10 +11,12 @@ namespace App\Http\Repositories\HiProject;
 
 use App\Models\HPPlan;
 use App\Models\HPTask;
+use App\Traits\QueryTrait;
 use Carbon\Carbon;
 
 class TaskRepository
 {
+    use QueryTrait;
     /**
      * @param $projectId
      * @param $goalType
@@ -41,11 +43,11 @@ class TaskRepository
             throw new \Exception('任务追踪目标不正确.');
         }
 
-        $planIds = HPPlan::query()
+        $planIds = $this->myQuery(HPPlan::query())
             ->where('project_id', $projectId)
             ->pluck('id');
 
-        $tasks = HPTask::query()
+        $tasks = $this->myQuery(HPTask::query())
             ->with('plan', 'sub_tasks')
             ->whereIn('plan_id', $planIds)
             ->where('due_at', '>', $timeFrom)

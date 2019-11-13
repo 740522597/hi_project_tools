@@ -10,6 +10,7 @@ class TaskComment extends Model
 
     public $fillable = [
       'task_id',
-      'content'
+      'content',
+      'created_by'
     ];
 }

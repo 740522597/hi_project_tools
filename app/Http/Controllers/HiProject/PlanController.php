@@ -27,27 +27,28 @@ class PlanController extends Controller
             if (!$name || !$projectId) {
                 throw new \Exception('缺少计划名称或者项目.');
             }
-            $project = HPProject::query()
+            $project = $this->myQuery(HPProject::query())
                 ->where('id', $projectId)
                 ->first();
             if (!$project) {
                 throw new \Exception('未能找到该项目');
             }
             if (!$id) {
-                HPPlan::query()
+                $this->myQuery(HPPlan::query())
                     ->firstOrCreate([
                         'project_id' => $project->id,
                         'title' => $name,
-                        'urgency_level' => -1
+                        'urgency_level' => -1,
+                        'created_by' => auth()->user()->id
                     ]);
             } else {
-                HPPlan::query()->where('id', $id)
+                $this->myQuery(HPPlan::query())->where('id', $id)
                     ->update([
                         'title' => $name
                     ]);
             }
 
-            $plans = HPPlan::query()
+            $plans = $this->myQuery(HPPlan::query())
                 ->where('project_id', $projectId)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -57,7 +58,7 @@ class PlanController extends Controller
                 $plan->save();
             }
 
-            $plans = HPPlan::query()
+            $plans = $this->myQuery(HPPlan::query())
                 ->where('project_id', $project->id)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -75,23 +76,22 @@ class PlanController extends Controller
             if (!$projectId) {
                 throw new \Exception('缺少项目ID.');
             }
-            $project = HPProject::query()
+            $projects = $this->myQuery(HPProject::query())->orderBy('id', 'desc')->get();
+            $project = $this->myQuery(HPProject::query())
                 ->where('id', $projectId)
                 ->first();
             if (!$project) {
                 throw new \Exception('未能找到该项目');
             }
 
-            $plans = HPPlan::query()
+            $plans = $this->myQuery(HPPlan::query())
                 ->where('project_id', $project->id)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
 
-            $projects = HPProject::query()->orderBy('id', 'desc')->get();
-
-            return response()->json(['success' => true, 'plans' => $plans, 'projects' => $projects]);
+            return $this->success(['plans' => $plans, 'projects' => $projects]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+            return $this->failed($e->getMessage());
         }
     }
 
@@ -101,7 +101,7 @@ class PlanController extends Controller
             $levels = $request->all();
             $planIds = [];
             foreach ($levels as $planId => $level) {
-                $plan = HPPlan::query()
+                $plan = $this->myQuery(HPPlan::query())
                     ->find($planId);
                 if (!$plan) {
                     throw new \Exception('未找到对应计划.');
@@ -111,7 +111,7 @@ class PlanController extends Controller
                 $plan->save();
             }
 
-            $plans = HPPlan::query()
+            $plans = $this->myQuery(HPPlan::query())
                 ->whereIn('id', $planIds)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -134,12 +134,12 @@ class PlanController extends Controller
             if (!$planId) {
                 throw new \Exception('缺少计划ID.');
             }
-            $plan = HPPlan::query()
+            $plan = $this->myQuery(HPPlan::query())
                 ->find($planId);
             if (!$plan) {
                 throw new \Exception('该计划已被删除.');
             }
-            $tasksCount = HPTask::query()
+            $tasksCount = $this->myQuery(HPTask::query())
                 ->where('plan_id', $planId)
                 ->count();
 
@@ -149,7 +149,7 @@ class PlanController extends Controller
             $projectId = $plan->project_id;
             $plan->delete();
 
-            $plans = HPPlan::query()
+            $plans = $this->myQuery(HPPlan::query())
                 ->where('project_id', $projectId)
                 ->orderBy('urgency_level', 'asc')
                 ->get();
@@ -172,12 +172,12 @@ class PlanController extends Controller
             if (!$planId) {
                 throw new \Exception('缺少计划ID.');
             }
-            $plan = HPPlan::query()
+            $plan = $this->myQuery(HPPlan::query())
                 ->find($planId);
             if (!$plan) {
                 throw new \Exception('该计划已被删除.');
             }
-            $tasksCount = HPTask::query()
+            $tasksCount = $this->myQuery(HPTask::query())
                 ->where('plan_id', $planId)
                 ->whereNotIn('status', ['DONE'])
                 ->count();
@@ -188,17 +188,17 @@ class PlanController extends Controller
             $planArray = $plan->toArray();
             unset($planArray['unfinished_count']);
 
-            ArchivedPlan::query()
+            $this->myQuery(ArchivedPlan::query())
                 ->firstOrCreate($planArray);
 
-            $tasks = HPTask::query()
+            $tasks = $this->myQuery(HPTask::query())
                 ->where('plan_id', $plan->id)
                 ->get();
 
             foreach ($tasks as $task) {
                 $taskArray = $task->toArray();
                 unset($taskArray['is_pass_due']);
-                ArchivedTask::query()
+                $this->myQuery(ArchivedTask::query())
                     ->firstOrCreate($taskArray);
                 $task->delete();
             }
@@ -217,7 +217,7 @@ class PlanController extends Controller
             if (!$planId) {
                 throw new \Exception('缺少计划ID.');
             }
-            $plan = HPPlan::query()
+            $plan = $this->myQuery(HPPlan::query())
                 ->find($planId);
             if (!$plan) {
                 throw new \Exception('该计划已被删除.');

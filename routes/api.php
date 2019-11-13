@@ -67,6 +67,7 @@ Route::middleware('auth:api')->prefix('hi-project')->group(function () {
 
     //ProjectController
     Route::post('load-projects', 'HiProject\ProjectController@loadProjects');
+    Route::post('add-project', 'HiProject\ProjectController@addProject');
 
     //ArchivedTaskController
     Route::post('archived-load-comments', 'HiProject\ArchivedTaskController@loadComments');

@@ -24,7 +24,8 @@ class HPTask extends Model
         'status',
         'urgency_level',
         'due_at',
-        'notified_at'
+        'notified_at',
+        'created_by'
     ];
     public $appends  = ['is_pass_due', 'sub_tasks_finished'];
 
