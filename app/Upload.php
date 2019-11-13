@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Upload extends Model
 {
@@ -13,4 +14,11 @@ class Upload extends Model
       'name',
       'path'
     ];
+
+    public $appends = ['url'];
+
+    public function getUrlAttribute()
+    {
+        return Storage::url($this->attributes['path']);
+    }
 }

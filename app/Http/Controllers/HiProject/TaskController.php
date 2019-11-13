@@ -385,7 +385,7 @@ class TaskController extends Controller
             }
             if ($file->isValid()) {
                 $fileExtension = $file->getClientOriginalExtension();
-                if (!in_array($fileExtension, ['png', 'jpg', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'pdf'])) {
+                if (!in_array($fileExtension, ['png', 'jpg', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'pdf', 'jpeg'])) {
                     throw new \Exception('文件格式不正确');
                 }
                 $tmpFile = $file->getRealPath();
@@ -398,12 +398,11 @@ class TaskController extends Controller
                 }
                 $fileName = date('Y_m_d') . '/' . md5(time()) . mt_rand(0, 9999) . '.' . $fileExtension;
                 if (Storage::disk('public')->put($fileName, file_get_contents($tmpFile))) {
-                    $path = 'app/public/' . $fileName;
                     Upload::query()
                         ->firstOrCreate([
                             'task_id' => $task->id,
                             'name'    => $realName,
-                            'path'    => $path
+                            'path'    => $fileName
                         ]);
                 }
             }
