@@ -61,16 +61,16 @@ class HPTask extends Model
 
     public function sub_tasks()
     {
-        return $this->hasMany(SubTask::class, 'task_id', 'id');
+        return $this->hasMany(SubTask::class, 'task_id', 'id')->orderBy('id', 'desc');
     }
 
     public function files()
     {
-        return $this->hasMany(Upload::class, 'task_id', 'id');
+        return $this->hasMany(Upload::class, 'task_id', 'id')->orderBy('id', 'desc');
     }
 
     public function comments()
     {
-        return $this->hasMany(TaskComment::class, 'task_id', 'id');
+        return $this->hasMany(TaskComment::class, 'task_id', 'id')->orderBy('id', 'desc');
     }
 }
